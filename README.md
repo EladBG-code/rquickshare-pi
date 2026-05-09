@@ -14,6 +14,24 @@
 
 ![demo image](.github/demo.png)
 
+Experimental Raspberry Pi OS ARM64 Support
+--------------------------
+
+This private branch/repository is an unofficial experimental compatibility fork
+based on the official RQuickShare project by Martin ANDRE:
+
+https://github.com/Martichou/rquickshare
+
+The goal is to investigate Raspberry Pi 5 support on Raspberry Pi OS 64-bit
+ARM64/aarch64. The official license, copyright notices, author names, and
+credits must stay intact. No public Raspberry Pi releases should be published
+until the app has actually been built and tested on Raspberry Pi hardware.
+
+Windows x86_64 is only being used as the development and Git machine for this
+work. A successful Windows-side check does not prove Raspberry Pi OS ARM64
+compatibility. See [PI_BUILD_NOTES.md](PI_BUILD_NOTES.md) for the Raspberry Pi
+build and test plan.
+
 Installation
 --------------------------
 
