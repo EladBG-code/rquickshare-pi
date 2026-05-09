@@ -1,10 +1,10 @@
 [package]
-name = "rquickshare"
+name = "rquickshare-pi"
 version = "0.11.5"
-default-run = "rquickshare"
+default-run = "rquickshare-pi"
 edition = "2021"
-authors = ["martichou"]
-repository = "https://github.com/Martichou/rquickshare"
+authors = ["martichou", "EladBG-code"]
+repository = "https://github.com/EladBG-code/rquickshare-pi"
 license = "AGPL-3.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

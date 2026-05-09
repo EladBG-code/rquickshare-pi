@@ -1,36 +1,36 @@
 <div align="center">
-  <h1>rquickshare</h1>
+  <h1>RQuickShare Pi</h1>
 
   <p>
-    <strong>NearbyShare/QuickShare for Linux and MacOS</strong>
+    <strong>Experimental Raspberry Pi OS ARM64 fork of RQuickShare</strong>
   </p>
   <p>
 
-[![CI](https://github.com/Martichou/rquickshare/actions/workflows/build.yml/badge.svg)](https://github.com/Martichou/rquickshare/actions)
-[![CI](https://github.com/Martichou/rquickshare/actions/workflows/lint.yml/badge.svg)](https://github.com/Martichou/rquickshare/actions)
+[![CI](https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml/badge.svg)](https://github.com/EladBG-code/rquickshare-pi/actions)
+[![CI](https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml/badge.svg)](https://github.com/EladBG-code/rquickshare-pi/actions)
 
   </p>
 </div>
 
 ![demo image](.github/demo.png)
 
-Experimental Raspberry Pi OS ARM64 Support
+About This Fork
 --------------------------
 
-This private branch/repository is an unofficial experimental compatibility fork
-based on the official RQuickShare project by Martin ANDRE:
+RQuickShare Pi is an unofficial, public, experimental Raspberry Pi OS ARM64
+fork based on the official RQuickShare project by Martin ANDRE:
 
 https://github.com/Martichou/rquickshare
 
-The goal is to investigate Raspberry Pi 5 support on Raspberry Pi OS 64-bit
-ARM64/aarch64. The official license, copyright notices, author names, and
-credits must stay intact. No public Raspberry Pi releases should be published
-until the app has actually been built and tested on Raspberry Pi hardware.
+The goal is to make this repository its own Raspberry Pi-focused project while
+preserving the upstream license, copyright notices, author names, credits, and
+project history. Upstream remains available as a reference source for selective
+review and merges; this repository should not be automatically overwritten by
+the upstream project.
 
-Windows x86_64 is only being used as the development and Git machine for this
-work. A successful Windows-side check does not prove Raspberry Pi OS ARM64
-compatibility. See [PI_BUILD_NOTES.md](PI_BUILD_NOTES.md) for the Raspberry Pi
-build and test plan.
+Raspberry Pi support is only claimed when it has actually built and run on real
+Raspberry Pi hardware. See [PI_BUILD_NOTES.md](PI_BUILD_NOTES.md) for the
+Raspberry Pi build and test plan.
 
 Installation
 --------------------------
@@ -177,10 +177,10 @@ In this case, you may want to configure a static port to allow it in your firewa
 
 ```bash
 # linux
-vim ./.local/share/dev.mandre.rquickshare/.settings.json
+vim ./.local/share/dev.eladbg.rquickshare-pi/.settings.json
 
 # mac
-vim Library/Application\ Support/dev.mandre.rquickshare/.settings.json
+vim Library/Application\ Support/dev.eladbg.rquickshare-pi/.settings.json
 
 # to be sure
 find $HOME -name ".settings.json"
@@ -206,7 +206,7 @@ This happens for some users running Linux + NVIDIA cards.
 The workaround is to start RQuickShare with an env variable defined as follows:
 
 ```bash
-env WEBKIT_DISABLE_COMPOSITING_MODE=1 rquickshare
+env WEBKIT_DISABLE_COMPOSITING_MODE=1 rquickshare-pi
 ```
 
 Alternatively, you may try the `legacy` variant.

@@ -182,7 +182,7 @@ async function getDownloadPath(vm: TauriVM) {
 
 async function getLatestVersion(vm: TauriVM) {
 	try {
-		const response = await fetch('https://api.github.com/repos/martichou/rquickshare/releases/latest');
+		const response = await fetch('https://api.github.com/repos/EladBG-code/rquickshare-pi/releases/latest');
 		if (!response.ok) {
 			throw new Error(`Error: ${response.status} ${response.statusText}`);
 		}

@@ -116,10 +116,11 @@ protoc --version
 
 `uname -m` should report `aarch64`.
 
-## Clone This Private Fork on the Pi
+## Clone This Fork on the Pi
 
-Because this repository is private, authenticate GitHub on the Pi first. One
-option is to use GitHub CLI:
+If you want to push changes from the Pi, authenticate GitHub first. For
+read-only testing after the repository is public, authentication is not required.
+One authenticated option is GitHub CLI:
 
 ```bash
 gh auth login
@@ -146,7 +147,7 @@ git remote -v
 
 Expected remotes:
 
-- `origin`: your private fork.
+- `origin`: your RQuickShare Pi fork.
 - `upstream`: the official RQuickShare repository.
 
 ## Build on the Pi
@@ -166,22 +167,20 @@ Then build the Tauri app:
 cd app/main
 pnpm install --frozen-lockfile
 pnpm check
-pnpm build:debug
+pnpm tauri build -d --bundles deb
 ```
 
-For a release package attempt:
+The full Tauri `targets = "all"` build currently attempts more package formats
+than the Pi needs. Prefer the Debian bundle while Raspberry Pi support is being
+validated.
+
+For a full release package attempt:
 
 ```bash
 pnpm build
 ```
 
 For a development run with useful logs:
-
-```bash
-RUST_BACKTRACE=1 RUST_LOG=debug pnpm dev
-```
-
-If the WebKit window opens blank on the Pi, retry with:
 
 ```bash
 WEBKIT_DISABLE_COMPOSITING_MODE=1 RUST_BACKTRACE=1 RUST_LOG=debug pnpm dev
@@ -193,7 +192,7 @@ If the build fails, collect the full command output:
 
 ```bash
 cd app/main
-RUST_BACKTRACE=1 RUST_LOG=debug pnpm build:debug 2>&1 | tee "$HOME/rquickshare-pi-build.log"
+RUST_BACKTRACE=1 RUST_LOG=debug pnpm tauri build -d --bundles deb 2>&1 | tee "$HOME/rquickshare-pi-build.log"
 ```
 
 For runtime discovery, Bluetooth, or mDNS issues, collect:

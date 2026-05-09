@@ -4256,7 +4256,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rquickshare"
+name = "rquickshare-pi"
 version = "0.11.5"
 dependencies = [
  "anyhow",

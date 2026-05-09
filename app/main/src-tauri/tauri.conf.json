@@ -39,12 +39,12 @@
     "beforeDevCommand": "pnpm vite:dev",
     "devUrl": "http://localhost:1420"
   },
-  "productName": "rquickshare",
-  "identifier": "dev.mandre.rquickshare",
+  "productName": "RQuickShare Pi",
+  "identifier": "dev.eladbg.rquickshare-pi",
   "app": {
     "windows": [
       {
-        "title": "RQuickShare",
+        "title": "RQuickShare Pi",
         "width": 900,
         "height": 600,
         "resizable": true,
