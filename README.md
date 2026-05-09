@@ -1,233 +1,293 @@
 <div align="center">
+  <img src="app/main/src-tauri/icons/rquickshare-pi.svg" width="140" alt="RQuickShare Pi logo" />
+
   <h1>RQuickShare Pi</h1>
 
   <p>
-    <strong>Experimental Raspberry Pi OS ARM64 fork of RQuickShare</strong>
+    <strong>Quick Share for Raspberry Pi OS ARM64, built and tested on real Pi hardware.</strong>
   </p>
+
   <p>
+    🥧 Raspberry Pi 5 · 🐧 Raspberry Pi OS 64-bit · 🦀 Rust · ⚡ Tauri · 📡 mDNS · 🟦 Bluetooth
+  </p>
 
-[![CI](https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml/badge.svg)](https://github.com/EladBG-code/rquickshare-pi/actions)
-[![CI](https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml/badge.svg)](https://github.com/EladBG-code/rquickshare-pi/actions)
-
+  <p>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/actions">
+      <img src="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml/badge.svg" alt="Build status" />
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/actions">
+      <img src="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml/badge.svg" alt="Lint status" />
+    </a>
   </p>
 </div>
 
-![demo image](.github/demo.png)
+## 🚀 What Is This?
 
-About This Fork
---------------------------
+RQuickShare Pi is a Raspberry Pi-focused fork of
+[RQuickShare](https://github.com/Martichou/rquickshare), the open-source
+Nearby Share / Quick Share desktop app.
 
-RQuickShare Pi is an unofficial, public, experimental Raspberry Pi OS ARM64
-fork based on the official RQuickShare project by Martin ANDRE:
+This fork exists because Raspberry Pi support needs real ARM64 testing, native
+Linux desktop dependencies, Bluetooth, mDNS, WebKitGTK, and patience. A GitHub
+Actions build on x86_64 does not prove anything here. This repo is for the real
+Pi target.
+
+Current target:
+
+- 🧠 Device: Raspberry Pi 5
+- 🐧 OS: Raspberry Pi OS 64-bit / Debian Bookworm
+- 🏗️ Architecture: `aarch64`
+- 📦 App stack: Tauri 2 + Vue 3 + Rust core library
+- 📡 Discovery stack: mDNS + Bluetooth advertisement
+
+## ✅ Current Pi Status
+
+The app has been built and started on a real Raspberry Pi 5.
+
+Verified locally on the Pi:
+
+- ✅ `core_lib` tests pass
+- ✅ `core_lib` builds
+- ✅ Tauri app checks
+- ✅ Debian debug bundle builds
+- ✅ App starts and reaches `RunEvent::Ready`
+- ✅ TCP listener starts
+- ✅ mDNS broadcasts as `raspberrypi`
+- ✅ BLE listener starts
+
+Known rough edges:
+
+- ⚠️ Full Tauri `targets = "all"` bundling can stall on non-Debian package
+  formats. Use the Debian bundle while Pi support is being stabilized.
+- ⚠️ Vue devtools Electron sidecar crashes on this Pi setup, so `pnpm dev`
+  intentionally runs Tauri directly.
+- ⚠️ Raspberry Pi support is experimental until repeated send/receive testing
+  is complete.
+
+## 🧬 Relationship To Upstream
+
+This project is based on the excellent upstream work by Martin ANDRE:
 
 https://github.com/Martichou/rquickshare
 
-The goal is to make this repository its own Raspberry Pi-focused project while
-preserving the upstream license, copyright notices, author names, credits, and
-project history. Upstream remains available as a reference source for selective
-review and merges; this repository should not be automatically overwritten by
-the upstream project.
+The goal is for this fork to become its own Pi-first project while keeping the
+upstream license, credits, copyright notices, and project history intact.
 
-Raspberry Pi support is only claimed when it has actually built and run on real
-Raspberry Pi hardware. See [PI_BUILD_NOTES.md](PI_BUILD_NOTES.md) for the
-Raspberry Pi build and test plan.
+Guardrails for this repo:
 
-Installation
---------------------------
+- 🛡️ `origin` is `EladBG-code/rquickshare-pi`
+- 🔒 `upstream` is fetch-only locally; pushing to upstream is disabled
+- 🔀 upstream changes should be reviewed and merged intentionally
+- 🧭 this fork should not be blindly overwritten by the main RQuickShare project
 
-You simply have to download the latest release.
+## 🛠️ Build On Raspberry Pi OS
 
-**Important notes:**
-- The minimum GLIBC version supported is included in the pkg name.
-  - You can check yours with `ldd --version`.
-- RQuickShare was distributed with two version (main & legacy) up until v0.11.5:
-  - Legacy is for compatibility with older Ubuntu versions: [here](https://github.com/Martichou/rquickshare/releases/tag/v0.11.5).
-  - Main is for future support of newer versions of Ubuntu.
-
-#### macOS
-
-Simply install the .dmg.
-
-Note that you may have to first allow the app to install under `Settings > Privacy & Security > Security` (you should see a dialog asking for permission)
-
-#### Linux
-
-##### Install dependencies
-
-RQuickShare requires one of the following libraries to be installed:
-
-- `libayatana-appindicator`
-- `libappindicator3`
-
-The files should (in theory) install those dependencies by themselves, but if this is not the case you may have to install those manually.
-
-##### Install rquickshare
-```bash
-sudo dpkg -i r-quick-share_${VERSION}.deb
-```
-
-#### Debian
-```bash
-sudo dpkg -i r-quick-share_${VERSION}.deb
-```
-
-#### RPM
-```bash
-sudo rpm -i r-quick-share-${VERSION}.rpm
-```
-
-#### DNF (preferred over RPM)
-```bash
-sudo dnf install r-quick-share-${VERSION}.rpm
-```
-
-#### AppImage (no root required)
-
-AppImage is a little different. There's no installation needed, you simply have to give it the executable permission (+x on a chmod) to run it.
+Install system dependencies:
 
 ```bash
-chmod +x r-quick-share_${VERSION}.AppImage
+sudo apt update
+sudo apt install -y \
+  git \
+  curl \
+  build-essential \
+  pkg-config \
+  libssl-dev \
+  protobuf-compiler \
+  libprotobuf-dev \
+  libdbus-1-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev \
+  libsoup-3.0-dev \
+  libjavascriptcoregtk-4.1-dev \
+  libwebkit2gtk-4.1-dev \
+  bluez \
+  avahi-daemon \
+  libavahi-client-dev
 ```
 
-You can then either double click on it, or run it from the cmd line:
+Enable runtime services:
 
 ```bash
-./r-quick-share_${VERSION}.AppImage
+sudo systemctl enable --now bluetooth
+sudo systemctl enable --now avahi-daemon
 ```
 
----
-
-<details>
-<summary>Unofficial Installation Methods</summary>
-
-#### AUR (Arch)
-
-For Arch Linux, you can install it from the AUR by using an AUR helper like yay:
+Install Rust:
 
 ```bash
-yay -S r-quick-share
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+. "$HOME/.cargo/env"
+rustup toolchain install stable
+rustup toolchain install nightly
+rustup default stable
 ```
 
-### Nix
-
-Available here: [NixOS](https://search.nixos.org/packages?channel=24.05&show=rquickshare&from=0&size=50&sort=relevance&type=packages&query=rquickshare)
-
-A nix-shell will temporarily modify your $PATH environment variable. This can be used to try a piece of software before deciding to permanently install it.
+Install Node.js 20 and pnpm 9.7.0:
 
 ```bash
-$ nix-shell -p rquickshare
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo corepack enable
+corepack prepare pnpm@9.7.0 --activate
 ```
-</details>
 
----
-
-Limitations
---------------------------
-
-- **Wi-Fi LAN only**. Your devices need to be on the same network for this app to work.
-
-FAQ
---------------------------
-
-### My Android device doesn't see my laptop
-
-Make sure both your devices are on the same WiFi network. mDNS communication should be allowed on the network; this may not be the case if you're on a public network (coffee shops, airports, etc.).
-
-### My laptop doesn't see my Android device
-
-For some reason, Android doesn't broadcast its mDNS service all the time, even when in "Everyone" mode.
-
-The first solution (implemented in RQuickShare for Linux) is to broadcast a bluetooth advertisement so that Android will then make its mDNS available.
-Of course, for this you need to have bluetooth on your laptop/desktop. If you don't have that, continue reading.
-
-As a workaround, you can use the "[Files](https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.files)" app on your Android device and go to the "Nearby Share" tab (if it's not present, continue reading).
-
-A second workaround is to download a Shortcut maker (see [here](https://xdaforums.com/t/how-to-manually-create-a-homescreen-shortcut-to-a-known-unique-android-activity.4336833)) to create a shortcut to the particular intent:
-
-- Method A:
-	- Activity: `com.google.android.gms.nearby.sharing.ReceiveSurfaceActivity`
-
-- Method B:
-	- Action: `com.google.android.gms.RECEIVE_NEARBY`
-	- Mime type: `*/*`
-
-_Note: Samsung did something shady with Quick Share, so the above workaround may not work. Unfortunately, there's no alternative at the moment. Sorry._
-
-### When sharing a file, my phone appears and disappears "randomly"
-
-TLDR: This is normal if you're just using bluetooth (as explained in the previous point).
-
-Android will see that your laptop/desktop is trying to share a file and will reveal itself. But for some reason, Android will de-register its service from time to time and will only then be revealed again once it detects the bluetooth message again.
-
-### Once I close the app, it won't reopen
-
-Make sure the app is really closed by running:
+Clone and build:
 
 ```bash
-ps aux | grep r-quick-share
+git clone git@github.com:EladBG-code/rquickshare-pi.git
+cd rquickshare-pi
+git switch pi-arm64-support
 ```
-
-If you see that the process is still running, it's because the app is not closed. This may be an intended behavior: when closing the window, the app won't stop and instead is still running and accessible via the system tray icon. However, if your distribution doesn't support/hasn't enabled this, it may be an issue for you.
-
-If you want to **really** close the app when clicking on the close button, you can change that inside the app by clicking on the three dots and then "Stop app on close".
-
-### My firewall is blocking the connection
-
-In this case, you may want to configure a static port to allow it in your firewall. You can do so by modifying the config file as follow:
 
 ```bash
-# linux
-vim ./.local/share/dev.eladbg.rquickshare-pi/.settings.json
-
-# mac
-vim Library/Application\ Support/dev.eladbg.rquickshare-pi/.settings.json
-
-# to be sure
-find $HOME -name ".settings.json"
+cd core_lib
+cargo test
+cargo build
 ```
 
-> [!WARNING]
->
-> The json must stay valid after your modification; for example, if "port" is the last item of the JSON it must not have a comma after it, otherwise the config will be reset.
+```bash
+cd ../app/main
+pnpm install --frozen-lockfile
+pnpm check
+pnpm tauri build -d --bundles deb
+```
+
+The Debian bundle is written under:
+
+```text
+app/main/src-tauri/target/debug/bundle/deb/
+```
+
+## ▶️ Run On The Pi
+
+For development:
+
+```bash
+cd app/main
+WEBKIT_DISABLE_COMPOSITING_MODE=1 RUST_BACKTRACE=1 RUST_LOG=debug pnpm dev
+```
+
+For the built debug binary:
+
+```bash
+WEBKIT_DISABLE_COMPOSITING_MODE=1 RUST_BACKTRACE=1 RUST_LOG=debug \
+  ./app/main/src-tauri/target/debug/rquickshare-pi
+```
+
+If discovery is acting strange, check the Pi services:
+
+```bash
+bluetoothctl show
+rfkill list bluetooth
+systemctl status bluetooth --no-pager
+systemctl status avahi-daemon --no-pager
+ip addr
+```
+
+## 📁 Important Paths
+
+Settings on Linux:
+
+```text
+~/.local/share/dev.eladbg.rquickshare-pi/.settings.json
+```
+
+Main app:
+
+```text
+app/main
+```
+
+Rust core:
+
+```text
+core_lib
+```
+
+Canonical logo source:
+
+```text
+app/main/src-tauri/icons/rquickshare-pi.svg
+```
+
+## 🧪 Test Notes
+
+Real support means testing on the Pi, not just compiling somewhere else.
+
+Useful commands:
+
+```bash
+uname -m
+cat /etc/os-release
+rustc -Vv
+cargo -V
+node -v
+pnpm -v
+protoc --version
+```
+
+Expected architecture:
+
+```text
+aarch64
+```
+
+More detailed build notes live in:
+
+```text
+PI_BUILD_NOTES.md
+```
+
+## 🧯 Troubleshooting
+
+Blank WebKit window:
+
+```bash
+WEBKIT_DISABLE_COMPOSITING_MODE=1 pnpm dev
+```
+
+Need a static firewall port:
+
+```bash
+vim ~/.local/share/dev.eladbg.rquickshare-pi/.settings.json
+```
+
+Example:
 
 ```json
 {
-	...existing_config...,
-	"port": 12345
+  "port": 12345
 }
 ```
 
-By default the port is random (the OS will decide).
-
-### The app opens but I just get a blank window or cannot run it.
-
-This happens for some users running Linux + NVIDIA cards.
-
-The workaround is to start RQuickShare with an env variable defined as follows:
+App stays alive after closing the window:
 
 ```bash
-env WEBKIT_DISABLE_COMPOSITING_MODE=1 rquickshare-pi
+ps aux | grep rquickshare-pi
 ```
 
-Alternatively, you may try the `legacy` variant.
+That can be normal if the tray process is still running.
 
-WIP Notes
---------------------------
+## 📜 License
 
-`rquickshare` is still in development (WIP) and currently only supports Linux even though it should be compatible with macOS too. Keep in mind that the design may change between versions, so flexibility is key.
+This project keeps the upstream license:
 
-Got feedback or suggestions? We'd love to hear them! Feel free to open an issue and share your thoughts.
+```text
+AGPL-3.0
+```
 
-Credits
---------------------------
+## 🙏 Credits
 
-This project wouldn't exist without those amazing open-source project:
+RQuickShare Pi would not exist without the upstream project and the wider open
+source Nearby Share ecosystem:
 
+- https://github.com/Martichou/rquickshare
 - https://github.com/grishka/NearDrop
 - https://github.com/vicr123/QNearbyShare
 
+## 🌱 Direction
 
-Contributing
---------------------------
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+This fork starts as Raspberry Pi compatibility work, but it is intended to grow
+into a Pi-first app with its own identity, release flow, and hardware-tested
+support story.
