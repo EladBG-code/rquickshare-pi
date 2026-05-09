@@ -294,4 +294,6 @@ support story.
 
 ## ❤️ If you feel like supporting me for more stuff like this
 
-<img width="1200" height="600" alt="eladbg-Sharable-Profile)-Horizontal copy" src="https://github.com/user-attachments/assets/6d59980e-deeb-461f-a1a0-df62a0a030cb" href="https://ko-fi.com/eladbg"/>
+<a href="https://ko-fi.com/eladbg">
+  <img width="600" height="300" alt="eladbg-Sharable-Profile)-Horizontal copy" src="https://github.com/user-attachments/assets/6d59980e-deeb-461f-a1a0-df62a0a030cb" href="https://ko-fi.com/eladbg"/>
+</a>
