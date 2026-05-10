@@ -262,7 +262,7 @@ impl InboundRequest {
             .map_err(|_| anyhow!("Device name is not valid UTF-8"))?;
 
         // Parsing the device type
-        let raw_device_type = (endpoint_info[0] & 7) >> 1_usize;
+        let raw_device_type = (endpoint_info[0] >> 1_usize) & 0x7;
 
         Ok(RemoteDeviceInfo {
             name: device_name.to_string(),
