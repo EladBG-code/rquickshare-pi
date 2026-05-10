@@ -24,6 +24,17 @@ export interface DisplayedItem {
 	ack_bytes?: number,
 }
 
+export interface RuntimeIssue {
+	title: string,
+	message: string,
+	command?: string,
+}
+
+export interface RuntimeStatus {
+	ok: boolean,
+	issues: RuntimeIssue[],
+}
+
 export const visibilityToNumber: { [key in Visibility]: number } = {
 	'Visible': 0,
 	'Invisible': 1,
@@ -41,6 +52,7 @@ export const realcloseKey = "realclose";
 export const startminimizedKey = "startminimized";
 export const visibilityKey = "visibility";
 export const downloadPathKey = "download_path";
+export const lastErrorReportPathKey = "last_error_report_path";
 export const stateToDisplay: Array<Partial<State>> = ["ReceivedPairedKeyResult", "WaitingForUserConsent", "ReceivingFiles", "Disconnected",
 	"Finished", "SentIntroduction", "SendingFiles", "Cancelled", "Rejected"]
 

@@ -12,12 +12,7 @@
   </p>
 
   <p>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/actions">
-      <img src="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml/badge.svg" alt="Build status" />
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/actions">
-      <img src="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml/badge.svg" alt="Lint status" />
-    </a>
+    Hardware target: Raspberry Pi OS 64-bit on ARM64. Support is claimed only after local Pi build/run testing.
   </p>
 </div>
 
@@ -52,8 +47,9 @@ Verified locally on the Pi:
 - ✅ Debian debug bundle builds
 - ✅ App starts and reaches `RunEvent::Ready`
 - ✅ TCP listener starts
-- ✅ mDNS broadcasts as `raspberrypi`
+- ✅ mDNS publishes a resolvable Quick Share service on the active LAN address
 - ✅ BLE listener starts
+- ✅ BLE visibility follows the app visibility state
 
 Known rough edges:
 
@@ -82,6 +78,19 @@ Guardrails for this repo:
 
 ## 🛠️ Build On Raspberry Pi OS
 
+Fast path:
+
+```bash
+./install-rquickshare-pi.sh
+```
+
+The installer checks that it is running on ARM64, installs Pi dependencies,
+enables Bluetooth and Avahi, installs Rust/Node/pnpm if needed, builds the
+project, installs the `.deb`, and leaves the app available from the Accessories
+menu.
+
+Manual path:
+
 Install system dependencies:
 
 ```bash
@@ -103,6 +112,7 @@ sudo apt install -y \
   libwebkit2gtk-4.1-dev \
   bluez \
   avahi-daemon \
+  avahi-utils \
   libavahi-client-dev
 ```
 
@@ -274,8 +284,11 @@ That can be normal if the tray process is still running.
 This project keeps the upstream license:
 
 ```text
-AGPL-3.0
+GPL-3.0
 ```
+
+RQuickShare Pi includes modifications by EladBG-code. Original RQuickShare
+copyrights, author notices, license terms, and project history remain intact.
 
 ## 🙏 Credits
 

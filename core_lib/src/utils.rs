@@ -58,15 +58,62 @@ impl RemoteDeviceInfo {
         endpoint_info.extend((0..16).map(|_| rand::rng().random_range(0..=255)));
 
         // Device name in UTF-8 prefixed with 1-byte length
-        let mut name_chars = self.name.as_bytes().to_vec();
-        if name_chars.len() > 255 {
-            name_chars.truncate(255);
-        }
+        let name = normalize_device_name(&self.name);
+        let name_chars = name.as_bytes().to_vec();
         endpoint_info.push(name_chars.len() as u8);
         endpoint_info.extend(name_chars);
 
         endpoint_info
     }
+}
+
+pub fn default_device_name() -> String {
+    sys_metrics::host::get_hostname().unwrap_or_else(|_| String::from("RQuickShare Pi"))
+}
+
+pub fn mdns_host_name() -> String {
+    let mut label = default_device_name()
+        .to_ascii_lowercase()
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
+        .collect::<String>();
+
+    while label.contains("--") {
+        label = label.replace("--", "-");
+    }
+
+    let label = label.trim_matches('-');
+    let label = if label.is_empty() {
+        "rquickshare-pi"
+    } else {
+        label
+    };
+
+    format!("{}.local.", truncate_utf8_bytes(label, 63))
+}
+
+pub fn normalize_device_name(device_name: &str) -> String {
+    let trimmed = device_name.trim();
+    let normalized = if trimmed.is_empty() {
+        default_device_name()
+    } else {
+        trimmed.to_string()
+    };
+
+    truncate_utf8_bytes(&normalized, 64)
+}
+
+fn truncate_utf8_bytes(value: &str, max_bytes: usize) -> String {
+    if value.len() <= max_bytes {
+        return value.to_string();
+    }
+
+    let mut end = max_bytes;
+    while !value.is_char_boundary(end) {
+        end -= 1;
+    }
+
+    value[..end].to_string()
 }
 
 pub fn gen_mdns_name(endpoint_id: [u8; 4]) -> String {
@@ -96,12 +143,45 @@ pub fn gen_mdns_endpoint_info(device_type: u8, device_name: &str) -> String {
     let unknown_bytes = rand::rng().random::<[u8; 16]>();
     record.extend_from_slice(&unknown_bytes);
 
+    let device_name = normalize_device_name(device_name);
     let device_name = device_name.as_bytes();
     let length = device_name.len() as u8;
     record.push(length);
     record.extend_from_slice(device_name);
 
     URL_SAFE_NO_PAD.encode(&record)
+}
+
+pub fn local_mdns_ipv4_addrs() -> Vec<Ipv4Addr> {
+    let Ok(if_addrs) = get_if_addrs() else {
+        return Vec::new();
+    };
+
+    let mut addrs = if_addrs
+        .into_iter()
+        .filter(|if_addr| is_physical_lan_interface(&if_addr.name))
+        .filter_map(|if_addr| match if_addr.ip() {
+            std::net::IpAddr::V4(ip) => Some(ip),
+            std::net::IpAddr::V6(_) => None,
+        })
+        .filter(|ip| {
+            !ip.is_loopback() && !ip.is_link_local() && !ip.is_broadcast() && !ip.is_unspecified()
+        })
+        .collect::<Vec<_>>();
+
+    addrs.sort();
+    addrs.dedup();
+    addrs
+}
+
+fn is_physical_lan_interface(name: &str) -> bool {
+    const VIRTUAL_PREFIXES: &[&str] = &[
+        "br-", "docker", "lxc", "lxd", "tap", "tun", "veth", "virbr", "vmnet", "wg", "zt",
+    ];
+
+    !VIRTUAL_PREFIXES
+        .iter()
+        .any(|prefix| name.starts_with(prefix))
 }
 
 pub fn parse_mdns_endpoint_info(encoded_str: &str) -> Result<(DeviceType, String), anyhow::Error> {

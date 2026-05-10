@@ -75,6 +75,25 @@ pub fn get_download_path(app_handle: &AppHandle) -> Option<PathBuf> {
         .and_then(|json| json.as_str().map(PathBuf::from))
 }
 
+pub fn get_device_name(app_handle: &AppHandle) -> String {
+    let store = _get_store(app_handle);
+
+    store
+        .get("device_name")
+        .and_then(|json| json.as_str().map(rqs_lib::normalize_device_name))
+        .unwrap_or_else(rqs_lib::default_device_name)
+}
+
+pub fn set_device_name(app_handle: &AppHandle, device_name: &str) -> Result<String, anyhow::Error> {
+    let store = _get_store(app_handle);
+    let normalized = rqs_lib::normalize_device_name(device_name);
+
+    store.set("device_name", normalized.clone());
+    app_handle.emit("device_name_updated", normalized.clone())?;
+
+    Ok(normalized)
+}
+
 pub fn get_logging_level(app_handle: &AppHandle) -> Option<String> {
     let store = _get_store(app_handle);
 

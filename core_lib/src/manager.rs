@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::broadcast::Sender;
 use tokio::sync::mpsc::Receiver;
+use tokio::sync::{broadcast::Sender, watch};
 use tokio_util::sync::CancellationToken;
 use ts_rs::TS;
 
@@ -26,6 +26,7 @@ pub struct TcpServer {
     tcp_listener: TcpListener,
     sender: Sender<ChannelMessage>,
     connect_receiver: Receiver<SendInfo>,
+    device_name_receiver: watch::Receiver<String>,
 }
 
 impl TcpServer {
@@ -34,12 +35,14 @@ impl TcpServer {
         tcp_listener: TcpListener,
         sender: Sender<ChannelMessage>,
         connect_receiver: Receiver<SendInfo>,
+        device_name_receiver: watch::Receiver<String>,
     ) -> Result<Self, anyhow::Error> {
         Ok(Self {
             endpoint_id,
             tcp_listener,
             sender,
             connect_receiver,
+            device_name_receiver,
         })
     }
 
@@ -119,6 +122,7 @@ impl TcpServer {
             si.id,
             self.sender.clone(),
             si.ob,
+            self.device_name_receiver.borrow().clone(),
             RemoteDeviceInfo {
                 device_type: crate::DeviceType::Unknown,
                 name: si.name,

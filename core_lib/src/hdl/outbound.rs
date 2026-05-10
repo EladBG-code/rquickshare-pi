@@ -68,6 +68,7 @@ pub struct OutboundRequest {
     sender: Sender<ChannelMessage>,
     receiver: Receiver<ChannelMessage>,
     payload: OutboundPayload,
+    device_name: String,
 }
 
 impl OutboundRequest {
@@ -77,6 +78,7 @@ impl OutboundRequest {
         id: String,
         sender: Sender<ChannelMessage>,
         payload: OutboundPayload,
+        device_name: String,
         rdi: RemoteDeviceInfo,
     ) -> Self {
         let receiver = sender.subscribe();
@@ -102,6 +104,7 @@ impl OutboundRequest {
             sender,
             receiver,
             payload,
+            device_name,
         }
     }
 
@@ -226,10 +229,10 @@ impl OutboundRequest {
                 ),
                 connection_request: Some(location_nearby_connections::ConnectionRequestFrame {
                     endpoint_id: Some(String::from_utf8_lossy(&self.endpoint_id).to_string()),
-                    endpoint_name: Some(sys_metrics::host::get_hostname()?.into()),
+                    endpoint_name: Some(self.device_name.clone().into()),
                     endpoint_info: Some(
                         RemoteDeviceInfo {
-                            name: sys_metrics::host::get_hostname()?,
+                            name: self.device_name.clone(),
                             device_type: DeviceType::Laptop,
                         }
                         .serialize(),

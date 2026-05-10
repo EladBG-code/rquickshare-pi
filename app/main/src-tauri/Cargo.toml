@@ -5,7 +5,7 @@ default-run = "rquickshare-pi"
 edition = "2021"
 authors = ["martichou", "EladBG-code"]
 repository = "https://github.com/EladBG-code/rquickshare-pi"
-license = "AGPL-3.0"
+license = "GPL-3.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]

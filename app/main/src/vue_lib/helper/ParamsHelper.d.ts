@@ -7,6 +7,7 @@ import { EndpointInfo } from '@martichou/core_lib/bindings/EndpointInfo';
 import { Visibility } from '@martichou/core_lib/bindings/Visibility';
 import { OutboundPayload } from '@martichou/core_lib/bindings/OutboundPayload';
 import { ChannelMessage } from '@martichou/core_lib/bindings/ChannelMessage';
+import { RuntimeStatus } from '../types';
 
 export interface TauriVM {
 	store: Store;
@@ -26,11 +27,16 @@ export interface TauriVM {
     downloadPath: string | undefined;
     hostname: string | undefined;
     settingsOpen: boolean;
+    runtimeStatus: RuntimeStatus | null;
+    runtimePromptOpen: boolean;
     new_version: string | null;
+    latest_release_url: string | null;
     enable: () => Promise<void>;
     disable: () => Promise<void>;
     invoke: (cmd: string, args?: InvokeArgs) => Promise<unknown>
     setVisibility: (vm: TauriVM, visibility: Visibility) => Promise<void>;
+    setDeviceName: (vm: TauriVM, deviceName: string) => Promise<void>;
+    checkRuntimeStatus: (vm: TauriVM) => Promise<void>;
 
     displayedIsEmpty: boolean;
     displayedItems: DisplayedItem[];

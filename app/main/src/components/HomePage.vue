@@ -2,6 +2,7 @@
 	<div class="flex flex-col w-full h-full bg-rose-50 max-w-full max-h-full overflow-hidden">
 		<ToastNotification />
 		<SettingsModal :vm="vm" @close="settingsOpen = false" />
+		<RuntimePromptModal :status="runtimeStatus" :open="runtimePromptOpen" @close="runtimePromptOpen = false" />
 
 		<Heading :vm="vm" :open-url="openUrl" @open-settings="settingsOpen = true" />
 
@@ -161,9 +162,10 @@ import { EndpointInfo } from '@martichou/core_lib/bindings/EndpointInfo';
 import { OutboundPayload } from '@martichou/core_lib/bindings/OutboundPayload';
 import { Visibility } from '@martichou/core_lib/bindings/Visibility';
 
-import { ToastNotification, ToDelete, stateToDisplay, autostartKey, DisplayedItem, useToastStore, opt, ToastType, utils } from '../vue_lib';
+import { ToastNotification, ToDelete, stateToDisplay, autostartKey, DisplayedItem, useToastStore, opt, ToastType, utils, RuntimeStatus } from '../vue_lib';
 
 import SettingsModal from '../composables/SettingsModal.vue';
+import RuntimePromptModal from '../composables/RuntimePromptModal.vue';
 import Heading from '../composables/Heading.vue';
 import SideMenu from '../composables/SideMenu.vue';
 import ContentStatus from '../composables/ContentStatus.vue';
@@ -175,6 +177,7 @@ export default {
 	components: {
 		ToastNotification,
 		SettingsModal,
+		RuntimePromptModal,
 		Heading,
 		SideMenu,
 		ContentStatus,
@@ -226,8 +229,11 @@ export default {
 			hostname: ref<string>(),
 
 			settingsOpen: ref<boolean>(false),
+			runtimeStatus: ref<RuntimeStatus | null>(null),
+			runtimePromptOpen: ref<boolean>(false),
 
 			new_version: opt<string>(),
+			latest_release_url: opt<string>(),
 		};
 	},
 
@@ -247,6 +253,8 @@ export default {
 			await this.getRealclose(this);
 			await this.getStartMinimized(this);
 			await this.getDownloadPath(this);
+			await this.checkRuntimeStatus(this);
+			await this.promptLatestErrorReport(this);
 
 			// Check permission for notification
 			let permissionGranted = await isPermissionGranted();
@@ -332,7 +340,7 @@ export default {
 				})
 			);
 
-			await this.getLatestVersion(this);
+			void this.getLatestVersion(this, true);
 		});
 	},
 

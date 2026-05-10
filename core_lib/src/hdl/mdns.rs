@@ -9,7 +9,9 @@ use tokio::time::{interval_at, Instant};
 use tokio_util::sync::CancellationToken;
 use ts_rs::TS;
 
-use crate::utils::{gen_mdns_endpoint_info, gen_mdns_name, DeviceType};
+use crate::utils::{
+    gen_mdns_endpoint_info, gen_mdns_name, local_mdns_ipv4_addrs, mdns_host_name, DeviceType,
+};
 
 const INNER_NAME: &str = "MDnsServer";
 const TICK_INTERVAL: Duration = Duration::from_secs(60);
@@ -37,9 +39,13 @@ impl Visibility {
 pub struct MDnsServer {
     daemon: ServiceDaemon,
     service_info: ServiceInfo,
+    endpoint_id: [u8; 4],
+    service_port: u16,
+    device_type: DeviceType,
     ble_receiver: Receiver<()>,
     visibility_sender: Arc<Mutex<watch::Sender<Visibility>>>,
     visibility_receiver: watch::Receiver<Visibility>,
+    device_name_receiver: watch::Receiver<String>,
 }
 
 impl MDnsServer {
@@ -49,24 +55,41 @@ impl MDnsServer {
         ble_receiver: Receiver<()>,
         visibility_sender: Arc<Mutex<watch::Sender<Visibility>>>,
         visibility_receiver: watch::Receiver<Visibility>,
+        device_name_receiver: watch::Receiver<String>,
     ) -> Result<Self, anyhow::Error> {
-        let service_info = Self::build_service(endpoint_id, service_port, DeviceType::Laptop)?;
+        let device_type = DeviceType::Laptop;
+        let service_info = Self::build_service(
+            endpoint_id,
+            service_port,
+            device_type.clone(),
+            &device_name_receiver.borrow(),
+        )?;
 
         Ok(Self {
             daemon: ServiceDaemon::new()?,
             service_info,
+            endpoint_id,
+            service_port,
+            device_type,
             ble_receiver,
             visibility_sender,
             visibility_receiver,
+            device_name_receiver,
         })
     }
 
     pub async fn run(&mut self, ctk: CancellationToken) -> Result<(), anyhow::Error> {
         info!("{INNER_NAME}: service starting");
         let monitor = self.daemon.monitor()?;
-        let ble_receiver = &mut self.ble_receiver;
+        let mut ble_receiver = self.ble_receiver.resubscribe();
         let mut visibility = *self.visibility_receiver.borrow();
         let mut interval = interval_at(Instant::now() + TICK_INTERVAL, TICK_INTERVAL);
+        let mut registered = false;
+
+        if visibility != Visibility::Invisible {
+            self.register_current_service("startup")?;
+            registered = true;
+        }
 
         loop {
             tokio::select! {
@@ -85,12 +108,25 @@ impl MDnsServer {
 
                     debug!("{INNER_NAME}: visibility changed: {visibility:?}");
                     if visibility == Visibility::Visible {
-                        self.daemon.register(self.service_info.clone())?;
+                        if registered {
+                            self.daemon.register_resend(self.service_info.get_fullname())?;
+                        } else {
+                            self.register_current_service("visibility")?;
+                            registered = true;
+                        }
                     } else if visibility == Visibility::Invisible {
-                        let receiver = self.daemon.unregister(self.service_info.get_fullname())?;
-                        let _ = receiver.recv();
+                        if registered {
+                            let receiver = self.daemon.unregister(self.service_info.get_fullname())?;
+                            let _ = receiver.recv();
+                            registered = false;
+                        }
                     } else if visibility == Visibility::Temporarily {
-                        self.daemon.register(self.service_info.clone())?;
+                        if registered {
+                            self.daemon.register_resend(self.service_info.get_fullname())?;
+                        } else {
+                            self.register_current_service("temporary visibility")?;
+                            registered = true;
+                        }
                         interval.reset();
                     }
                 }
@@ -104,9 +140,15 @@ impl MDnsServer {
                         // Android can sometime not see the mDNS service if the service
                         // was running BEFORE Android started the Discovery phase for QuickShare.
                         // So resend a broadcast if there's a android device sending.
-                        self.daemon.register_resend(self.service_info.get_fullname())?;
+                        if registered {
+                            self.daemon.register_resend(self.service_info.get_fullname())?;
+                        } else {
+                            self.register_current_service("nearby BLE event")?;
+                            registered = true;
+                        }
                     } else {
-                        self.daemon.register(self.service_info.clone())?;
+                        self.register_current_service("nearby BLE event")?;
+                        registered = true;
                     }
                 },
                 _ = interval.tick() => {
@@ -114,19 +156,57 @@ impl MDnsServer {
                         continue;
                     }
 
-                    let receiver = self.daemon.unregister(self.service_info.get_fullname())?;
-                    let _ = receiver.recv();
+                    if registered {
+                        let receiver = self.daemon.unregister(self.service_info.get_fullname())?;
+                        let _ = receiver.recv();
+                        registered = false;
+                    }
                     let _ = self.visibility_sender.lock().unwrap().send(Visibility::Invisible);
+                }
+                _ = self.device_name_receiver.changed() => {
+                    let device_name = self.device_name_receiver.borrow_and_update().clone();
+                    debug!("{INNER_NAME}: device name changed: {device_name}");
+
+                    if registered {
+                        if let Ok(receiver) = self.daemon.unregister(self.service_info.get_fullname()) {
+                            let _ = receiver.recv();
+                        }
+                        registered = false;
+                    }
+
+                    self.service_info = Self::build_service(
+                        self.endpoint_id,
+                        self.service_port,
+                        self.device_type.clone(),
+                        &device_name,
+                    )?;
+
+                    if visibility != Visibility::Invisible {
+                        self.register_current_service("device name change")?;
+                        registered = true;
+                    }
                 }
             }
         }
 
         // Unregister the mDNS service - we're shutting down
-        let receiver = self.daemon.unregister(self.service_info.get_fullname())?;
-        if let Ok(event) = receiver.recv() {
-            info!("MDnsServer: service unregistered: {:?}", &event);
+        if registered {
+            let receiver = self.daemon.unregister(self.service_info.get_fullname())?;
+            if let Ok(event) = receiver.recv() {
+                info!("MDnsServer: service unregistered: {:?}", &event);
+            }
         }
 
+        Ok(())
+    }
+
+    fn register_current_service(&self, reason: &str) -> Result<(), anyhow::Error> {
+        info!(
+            "{INNER_NAME}: registering {} on {} because {reason}",
+            self.service_info.get_fullname(),
+            self.service_info.get_hostname()
+        );
+        self.daemon.register(self.service_info.clone())?;
         Ok(())
     }
 
@@ -134,22 +214,38 @@ impl MDnsServer {
         endpoint_id: [u8; 4],
         service_port: u16,
         device_type: DeviceType,
+        device_name: &str,
     ) -> Result<ServiceInfo, anyhow::Error> {
         let name = gen_mdns_name(endpoint_id);
-        let hostname = sys_metrics::host::get_hostname()?;
-        info!("Broadcasting with: {hostname}");
-        let endpoint_info = gen_mdns_endpoint_info(device_type as u8, &hostname);
+        info!("Broadcasting with: {device_name}");
+        let endpoint_info = gen_mdns_endpoint_info(device_type as u8, device_name);
+        let hostname = mdns_host_name();
+        let addresses = local_mdns_ipv4_addrs();
+        let ip_csv = addresses
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
+
+        if ip_csv.is_empty() {
+            warn!("{INNER_NAME}: no physical LAN IPv4 address found; falling back to automatic mDNS address selection");
+        } else {
+            info!("{INNER_NAME}: advertising IPv4 address(es): {ip_csv}");
+        }
 
         let properties = [("n", endpoint_info)];
-        let si = ServiceInfo::new(
+        let mut si = ServiceInfo::new(
             "_FC9F5ED42C8A._tcp.local.",
             &name,
             &hostname,
-            "",
+            ip_csv.as_str(),
             service_port,
             &properties[..],
-        )?
-        .enable_addr_auto(AddrType::V4);
+        )?;
+
+        if ip_csv.is_empty() {
+            si = si.enable_addr_auto(AddrType::V4);
+        }
 
         Ok(si)
     }
