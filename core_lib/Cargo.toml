@@ -2,7 +2,9 @@
 name = "rqs_lib"
 version = "0.0.1-alpha"
 edition = "2021"
-authors = ["martichou"]
+authors = ["martichou", "EladBG-code"]
+repository = "https://github.com/EladBG-code/rquickshare-pi"
+license = "GPL-3.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]

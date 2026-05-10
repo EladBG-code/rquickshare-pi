@@ -1,6 +1,6 @@
 import { Visibility } from '@martichou/core_lib/bindings/Visibility';
 import { TauriVM } from './helper/ParamsHelper';
-import { autostartKey, DisplayedItem, downloadPathKey, lastErrorReportPathKey, numberToVisibility, realcloseKey, startminimizedKey, stateToDisplay, visibilityKey, visibilityToNumber } from './types';
+import { autostartKey, DisplayedItem, downloadPathKey, lastErrorReportPathKey, numberToVisibility, realcloseKey, RuntimeStatus, startminimizedKey, stateToDisplay, visibilityKey, visibilityToNumber } from './types';
 import { SendInfo } from '@martichou/core_lib/bindings/SendInfo';
 import { ChannelMessage } from '@martichou/core_lib/bindings/ChannelMessage';
 import { ChannelAction } from '@martichou/core_lib';
@@ -243,6 +243,12 @@ async function promptLatestErrorReport(vm: TauriVM) {
 	if (shouldOpenIssue) await open(issueUrl);
 }
 
+async function checkRuntimeStatus(vm: TauriVM) {
+	const status = await vm.invoke('get_runtime_status') as RuntimeStatus;
+	vm.runtimeStatus = status;
+	vm.runtimePromptOpen = !status.ok;
+}
+
 async function getLatestVersion(vm: TauriVM, prompt = false) {
 	try {
 		const response = await fetch(releasesApiUrl, {
@@ -309,6 +315,7 @@ export const utils = {
 	getDownloadPath,
 	setDeviceName,
 	promptLatestErrorReport,
+	checkRuntimeStatus,
 	getLatestVersion,
 	setStartMinimized,
 	getStartMinimized

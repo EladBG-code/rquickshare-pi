@@ -3,8 +3,18 @@ The project is divided into two parts:
 - **core_lib:** This is a Rust library that encompasses all the logic necessary for discovering, connecting to, and transferring files to QuickShare-compatible clients.
 - **app/main:** A Tauri application that utilizes core_lib to handle incoming requests and initiate outgoing ones.
 
-How to build
---------------------------
+How to build on Raspberry Pi OS ARM64
+-------------------------------------
+
+The friendly path is:
+
+```bash
+./install-rquickshare-pi.sh
+```
+
+That script installs the required Raspberry Pi OS packages, enables Bluetooth
+and Avahi, installs Rust/Node/pnpm if needed, builds the project, and installs
+the generated Debian package.
 
 ### core_lib
 
@@ -21,7 +31,7 @@ The app/main is developed as a Tauri application. For package management, pnpm i
 First, install the necessary dependencies:
 
 ```
-pnpm install
+pnpm install --frozen-lockfile
 ```
 
 - To run the debug version:
@@ -30,22 +40,13 @@ pnpm install
 pnpm dev
 ```
 
-- To build a release package (.deb & .AppImage & .rpm & .dmg (only on macos)):
+- To build a Raspberry Pi Debian package:
 
 ```
-pnpm build
+pnpm tauri build --bundles deb
 ```
 
 For more detailed information on building the app/main and understanding any potential limitations, it’s advised to consult the [Tauri documentation](https://v2.tauri.app/start).
 
-### app/main
-
-Everything is the same as the app/main one, except the output of the build :)
-
-- To build a release package (.deb & .AppImage):
-
-```
-pnpm build
-```
-
-For more detailed information on building the app/main and understanding any potential limitations, it’s advised to consult the [Tauri documentation](https://tauri.app/v1/guides/building/linux).
+This fork only publishes Raspberry Pi OS ARM64 support claims after local Pi
+build/run testing.

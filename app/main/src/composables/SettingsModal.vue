@@ -28,7 +28,11 @@ function openDownloadPicker() {
 }
 
 function openUpstream() {
-	open('https://github.com/Martichou/rquickshare');
+	void open('https://github.com/Martichou/rquickshare');
+}
+
+function openLicense() {
+	void open('https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE');
 }
 </script>
 
@@ -80,6 +84,16 @@ function openUpstream() {
 							RQuickShare
 						</button>
 						by Martin ANDRE. This fork keeps the upstream GPL-3.0 license, credits, and project history.
+					</p>
+					<p class="mt-2">
+						© EladBG for RQuickShare Pi changes. Original RQuickShare copyrights remain with their authors and contributors.
+						This software is provided without warranty under the
+						<button
+							type="button"
+							class="text-blue-600 hover:underline"
+							@click="openLicense">
+							GPL-3.0 license
+						</button>.
 					</p>
 				</div>
 			</div>

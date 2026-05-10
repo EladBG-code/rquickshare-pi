@@ -71,6 +71,27 @@ pub fn default_device_name() -> String {
     sys_metrics::host::get_hostname().unwrap_or_else(|_| String::from("RQuickShare Pi"))
 }
 
+pub fn mdns_host_name() -> String {
+    let mut label = default_device_name()
+        .to_ascii_lowercase()
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
+        .collect::<String>();
+
+    while label.contains("--") {
+        label = label.replace("--", "-");
+    }
+
+    let label = label.trim_matches('-');
+    let label = if label.is_empty() {
+        "rquickshare-pi"
+    } else {
+        label
+    };
+
+    format!("{}.local.", truncate_utf8_bytes(label, 63))
+}
+
 pub fn normalize_device_name(device_name: &str) -> String {
     let trimmed = device_name.trim();
     let normalized = if trimmed.is_empty() {
@@ -129,6 +150,38 @@ pub fn gen_mdns_endpoint_info(device_type: u8, device_name: &str) -> String {
     record.extend_from_slice(device_name);
 
     URL_SAFE_NO_PAD.encode(&record)
+}
+
+pub fn local_mdns_ipv4_addrs() -> Vec<Ipv4Addr> {
+    let Ok(if_addrs) = get_if_addrs() else {
+        return Vec::new();
+    };
+
+    let mut addrs = if_addrs
+        .into_iter()
+        .filter(|if_addr| is_physical_lan_interface(&if_addr.name))
+        .filter_map(|if_addr| match if_addr.ip() {
+            std::net::IpAddr::V4(ip) => Some(ip),
+            std::net::IpAddr::V6(_) => None,
+        })
+        .filter(|ip| {
+            !ip.is_loopback() && !ip.is_link_local() && !ip.is_broadcast() && !ip.is_unspecified()
+        })
+        .collect::<Vec<_>>();
+
+    addrs.sort();
+    addrs.dedup();
+    addrs
+}
+
+fn is_physical_lan_interface(name: &str) -> bool {
+    const VIRTUAL_PREFIXES: &[&str] = &[
+        "br-", "docker", "lxc", "lxd", "tap", "tun", "veth", "virbr", "vmnet", "wg", "zt",
+    ];
+
+    !VIRTUAL_PREFIXES
+        .iter()
+        .any(|prefix| name.starts_with(prefix))
 }
 
 pub fn parse_mdns_endpoint_info(encoded_str: &str) -> Result<(DeviceType, String), anyhow::Error> {

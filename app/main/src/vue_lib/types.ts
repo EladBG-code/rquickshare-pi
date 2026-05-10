@@ -24,6 +24,17 @@ export interface DisplayedItem {
 	ack_bytes?: number,
 }
 
+export interface RuntimeIssue {
+	title: string,
+	message: string,
+	command?: string,
+}
+
+export interface RuntimeStatus {
+	ok: boolean,
+	issues: RuntimeIssue[],
+}
+
 export const visibilityToNumber: { [key in Visibility]: number } = {
 	'Visible': 0,
 	'Invisible': 1,

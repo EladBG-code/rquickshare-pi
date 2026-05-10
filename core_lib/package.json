@@ -17,13 +17,13 @@
 	},
 	"repository": {
 	  "type": "git",
-	  "url": "git+https://github.com/Martichou/rquickshare.git"
+	  "url": "git+https://github.com/EladBG-code/rquickshare-pi.git"
 	},
-	"author": "Martin ANDRE",
+	"author": "Martin ANDRE and RQuickShare Pi contributors",
 	"bugs": {
-	  "url": "https://github.com/Martichou/rquickshare/issues"
+	  "url": "https://github.com/EladBG-code/rquickshare-pi/issues"
 	},
-	"homepage": "https://github.com/Martichou/rquickshare#readme",
+	"homepage": "https://github.com/EladBG-code/rquickshare-pi#readme",
 	"devDependencies": {
 	  "typescript": "^5.0.4"
 	}

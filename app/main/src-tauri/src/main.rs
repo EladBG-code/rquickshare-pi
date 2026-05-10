@@ -170,6 +170,7 @@ async fn main() -> Result<(), anyhow::Error> {
             cmds::change_device_name,
             cmds::change_visibility,
             cmds::get_latest_error_report,
+            cmds::get_runtime_status,
             cmds::start_discovery,
             cmds::stop_discovery,
             cmds::get_hostname,

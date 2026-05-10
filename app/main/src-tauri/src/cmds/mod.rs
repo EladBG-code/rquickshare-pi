@@ -10,6 +10,8 @@ mod error_report;
 pub use error_report::*;
 mod get_hostname;
 pub use get_hostname::*;
+mod get_runtime_status;
+pub use get_runtime_status::*;
 mod send_payload;
 pub use send_payload::*;
 mod send_to_rs;

@@ -7,6 +7,7 @@ use tokio::sync::watch;
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
+use crate::utils::default_device_name;
 use crate::Visibility;
 
 const SERVICE_DATA: Bytes = Bytes::from_static(&[
@@ -39,6 +40,7 @@ impl BleAdvertiser {
         );
 
         let service_uuid = Uuid::from_u16(0xFE2C);
+        self.set_discoverable(true).await;
         let handle = match self
             .advertise(service_uuid, SERVICE_DATA, Type::Broadcast)
             .await
@@ -56,6 +58,7 @@ impl BleAdvertiser {
         ctk.cancelled().await;
         info!("{INNER_NAME}: tracker cancelled, returning");
         drop(handle);
+        self.set_discoverable(false).await;
 
         Ok(())
     }
@@ -72,9 +75,11 @@ impl BleAdvertiser {
         );
 
         let service_uuid = Uuid::from_u16(0xFE2C);
+        let initial_discoverable = self.adapter.is_discoverable().await.unwrap_or(false);
         let mut handle = if *visibility_receiver.borrow() == Visibility::Invisible {
             None
         } else {
+            self.set_discoverable(true).await;
             Some(self.start_advertising(service_uuid).await?)
         };
 
@@ -83,6 +88,7 @@ impl BleAdvertiser {
                 _ = ctk.cancelled() => {
                     info!("{INNER_NAME}: tracker cancelled, returning");
                     drop(handle);
+                    self.set_discoverable(initial_discoverable).await;
                     return Ok(());
                 }
                 changed = visibility_receiver.changed() => {
@@ -92,7 +98,9 @@ impl BleAdvertiser {
 
                     if visibility == Visibility::Invisible {
                         handle = None;
+                        self.set_discoverable(false).await;
                     } else if handle.is_none() {
+                        self.set_discoverable(true).await;
                         handle = Some(self.start_advertising(service_uuid).await?);
                     }
                 }
@@ -137,10 +145,19 @@ impl BleAdvertiser {
         adv_data: Bytes,
         advertisement_type: Type,
     ) -> Advertisement {
+        let is_peripheral = advertisement_type == Type::Peripheral;
         Advertisement {
             advertisement_type,
             service_data: [(service_uuid, adv_data.into())].into(),
+            discoverable: is_peripheral.then_some(true),
+            local_name: is_peripheral.then(default_device_name),
             ..Default::default()
+        }
+    }
+
+    async fn set_discoverable(&self, discoverable: bool) {
+        if let Err(err) = self.adapter.set_discoverable(discoverable).await {
+            warn!("{INNER_NAME}: could not set adapter discoverable={discoverable}: {err}");
         }
     }
 }
