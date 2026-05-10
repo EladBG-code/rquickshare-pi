@@ -19,6 +19,9 @@ use ts_rs::TS;
 
 use crate::CUSTOM_DOWNLOAD;
 
+const ENDPOINT_INFO_VERSION: u8 = 1;
+const ENDPOINT_INFO_VISIBLE: u8 = 1;
+
 #[derive(Debug, Clone, Deserialize, PartialEq, Serialize, TS)]
 #[ts(export)]
 #[allow(dead_code)]
@@ -52,7 +55,7 @@ pub struct RemoteDeviceInfo {
 impl RemoteDeviceInfo {
     pub fn serialize(&self) -> Vec<u8> {
         // 1 byte: Version(3 bits)|Visibility(1 bit)|Device Type(3 bits)|Reserved(1 bit)
-        let mut endpoint_info: Vec<u8> = vec![((self.device_type.clone() as u8) << 1) & 0b111];
+        let mut endpoint_info: Vec<u8> = vec![endpoint_info_header(self.device_type.clone() as u8)];
 
         // 16 bytes: unknown random bytes
         endpoint_info.extend((0..16).map(|_| rand::rng().random_range(0..=255)));
@@ -138,7 +141,7 @@ pub fn gen_mdns_endpoint_info(device_type: u8, device_name: &str) -> String {
 
     // 1 byte: Version(3 bits)|Visibility(1 bit)|Device Type(3 bits)|Reserved(1 bits)
     // Device types: unknown=0, phone=1, tablet=2, laptop=3
-    record.push(device_type << 1);
+    record.push(endpoint_info_header(device_type));
 
     let unknown_bytes = rand::rng().random::<[u8; 16]>();
     record.extend_from_slice(&unknown_bytes);
@@ -152,6 +155,12 @@ pub fn gen_mdns_endpoint_info(device_type: u8, device_name: &str) -> String {
     URL_SAFE_NO_PAD.encode(&record)
 }
 
+fn endpoint_info_header(device_type: u8) -> u8 {
+    ((ENDPOINT_INFO_VERSION & 0x7) << 5)
+        | ((ENDPOINT_INFO_VISIBLE & 0x1) << 4)
+        | ((device_type & 0x7) << 1)
+}
+
 pub fn local_mdns_ipv4_addrs() -> Vec<Ipv4Addr> {
     let Ok(if_addrs) = get_if_addrs() else {
         return Vec::new();
@@ -161,17 +170,28 @@ pub fn local_mdns_ipv4_addrs() -> Vec<Ipv4Addr> {
         .into_iter()
         .filter(|if_addr| is_physical_lan_interface(&if_addr.name))
         .filter_map(|if_addr| match if_addr.ip() {
-            std::net::IpAddr::V4(ip) => Some(ip),
+            std::net::IpAddr::V4(ip) => Some((interface_priority(&if_addr.name), ip)),
             std::net::IpAddr::V6(_) => None,
         })
-        .filter(|ip| {
+        .filter(|(_, ip)| {
             !ip.is_loopback() && !ip.is_link_local() && !ip.is_broadcast() && !ip.is_unspecified()
         })
         .collect::<Vec<_>>();
 
     addrs.sort();
-    addrs.dedup();
-    addrs
+    addrs.dedup_by_key(|(_, ip)| *ip);
+    addrs.truncate(1);
+    addrs.into_iter().map(|(_, ip)| ip).collect()
+}
+
+fn interface_priority(name: &str) -> u8 {
+    if name.starts_with("eth") || name.starts_with("en") {
+        0
+    } else if name.starts_with("wlan") || name.starts_with("wl") {
+        1
+    } else {
+        2
+    }
 }
 
 pub fn ignored_mdns_interface_names() -> Vec<String> {
@@ -331,5 +351,19 @@ mod tests {
 
         assert_eq!(parse_info.1, device_name);
         assert_eq!(parse_info.0, device_type);
+    }
+
+    #[test]
+    fn test_mdns_info_header_matches_android_shape() {
+        let info = gen_mdns_endpoint_info(DeviceType::Laptop as u8, "raspberrypi-5");
+        let decoded = URL_SAFE_NO_PAD.decode(info).unwrap();
+
+        assert_eq!(decoded[0], 0x36);
+    }
+
+    #[test]
+    fn test_interface_priority_prefers_wired_before_wifi() {
+        assert!(interface_priority("eth0") < interface_priority("wlan0"));
+        assert!(interface_priority("enp1s0") < interface_priority("wlx001122334455"));
     }
 }
