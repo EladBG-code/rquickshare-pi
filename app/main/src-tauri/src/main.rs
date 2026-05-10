@@ -8,15 +8,20 @@ extern crate log;
 
 use std::sync::{Arc, Mutex};
 
+#[cfg(target_os = "linux")]
+use gtk::prelude::*;
+#[cfg(target_os = "linux")]
+use libappindicator::{AppIndicator, AppIndicatorStatus};
 use rqs_lib::channel::{ChannelDirection, ChannelMessage};
 use rqs_lib::{EndpointInfo, SendInfo, State, Visibility, RQS};
 use store::get_startminimized;
 use tauri::image::Image;
+#[cfg(not(target_os = "linux"))]
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
-    AppHandle, Emitter, Manager, Window, WindowEvent,
 };
+use tauri::{AppHandle, Emitter, Manager, Window, WindowEvent};
 use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::{broadcast, mpsc, watch};
 
@@ -38,6 +43,101 @@ pub struct AppState {
     pub sender_file: mpsc::Sender<SendInfo>,
     pub ble_receiver: broadcast::Receiver<()>,
     pub rqs: Mutex<RQS>,
+}
+
+#[cfg(target_os = "linux")]
+fn setup_tray(app: &tauri::App) -> Result<(), anyhow::Error> {
+    let icon_dir = linux_tray_icon_dir()?;
+    let icon_dir = icon_dir.to_string_lossy().into_owned();
+    let app_handle = app.app_handle().clone();
+    let quit_handle = app.app_handle().clone();
+
+    let mut indicator = AppIndicator::with_path("rquickshare-pi", "rquickshare-pi", &icon_dir);
+    indicator.set_title("RQuickShare Pi");
+    indicator.set_icon_theme_path(&icon_dir);
+    indicator.set_icon_full("rquickshare-pi", "RQuickShare Pi");
+    indicator.set_status(AppIndicatorStatus::Active);
+
+    let mut menu = gtk::Menu::new();
+    let title = gtk::MenuItem::with_label("RQuickShare Pi");
+    title.set_sensitive(false);
+
+    let show = gtk::MenuItem::with_label("Show");
+    show.connect_activate(move |_| {
+        trace!("tray_show");
+        open_main_window(&app_handle);
+    });
+
+    let quit = gtk::MenuItem::with_label("Quit");
+    quit.connect_activate(move |_| {
+        trace!("tray_quit");
+        kill_app(&quit_handle);
+    });
+
+    menu.append(&title);
+    menu.append(&gtk::SeparatorMenuItem::new());
+    menu.append(&show);
+    menu.append(&quit);
+    menu.show_all();
+
+    indicator.set_menu(&mut menu);
+
+    // AppIndicator and its menu must live for the whole process lifetime.
+    Box::leak(Box::new((indicator, menu)));
+
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn linux_tray_icon_dir() -> Result<std::path::PathBuf, anyhow::Error> {
+    let dir = std::env::var_os("XDG_RUNTIME_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(std::env::temp_dir)
+        .join("rquickshare-pi-tray");
+
+    std::fs::create_dir_all(&dir)?;
+    std::fs::write(
+        dir.join("rquickshare-pi.png"),
+        include_bytes!("../icons/tray.png"),
+    )?;
+
+    Ok(dir)
+}
+
+#[cfg(not(target_os = "linux"))]
+fn setup_tray(app: &tauri::App) -> Result<(), anyhow::Error> {
+    let name = MenuItemBuilder::new("RQuickShare Pi")
+        .enabled(false)
+        .build(app)?;
+    let show = MenuItemBuilder::with_id("show", "Show").build(app)?;
+    let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
+    let menu = MenuBuilder::new(app)
+        .item(&name)
+        .separator()
+        .items(&[&show, &quit])
+        .build()?;
+    let tray_icon = Image::from_bytes(include_bytes!("../icons/tray.png")).unwrap();
+
+    let tray = TrayIconBuilder::new()
+        .icon(tray_icon)
+        .menu(&menu)
+        .on_menu_event(move |app, event| match event.id().as_ref() {
+            "show" => {
+                trace!("tray_show");
+                open_main_window(app);
+            }
+            "quit" => {
+                trace!("tray_quit");
+                kill_app(app.app_handle());
+            }
+            _ => (),
+        })
+        .build(app)?;
+
+    #[cfg(target_os = "macos")]
+    let _ = tray.set_icon_as_template(true);
+
+    Ok(())
 }
 
 #[tokio::main]
@@ -78,45 +178,13 @@ async fn main() -> Result<(), anyhow::Error> {
             // Initialize default values for the store
             init_default(app.app_handle());
 
-            // Initialize system Tray
-            let name = MenuItemBuilder::new("RQuickShare Pi")
-                .enabled(false)
-                .build(app)?;
-            let show = MenuItemBuilder::with_id("show", "Show").build(app)?;
-            let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
-            let menu = MenuBuilder::new(app)
-                .item(&name)
-                .separator()
-                .items(&[&show, &quit])
-                .build()?;
-
             let window_icon = Image::from_bytes(include_bytes!("../icons/icon.png")).unwrap();
-            let tray_icon = Image::from_bytes(include_bytes!("../icons/tray.png")).unwrap();
 
             if let Some(window) = app.get_webview_window("main") {
                 window.set_icon(window_icon)?;
             }
 
-            let tray = TrayIconBuilder::new()
-                .icon(tray_icon)
-                .menu(&menu)
-                .on_menu_event(move |app, event| match event.id().as_ref() {
-                    "show" => {
-                        trace!("tray_show");
-                        open_main_window(app);
-                    }
-                    "quit" => {
-                        trace!("tray_quit");
-                        kill_app(app.app_handle());
-                    }
-                    _ => (),
-                })
-                .build(app)?;
-
-            #[cfg(target_os = "macos")]
-            let _ = tray.set_icon_as_template(true);
-            #[cfg(not(target_os = "macos"))]
-            let _ = tray.set_icon_as_template(false);
+            setup_tray(app)?;
 
             // Fetch initial configuration values
             let visibility = get_visibility(app.app_handle());
