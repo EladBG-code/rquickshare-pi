@@ -6,7 +6,7 @@
 		<Heading :vm="vm" :open-url="openUrl" @open-settings="settingsOpen = true" />
 
 		<div class="flex-1 flex flex-row">
-			<SideMenu :vm="vm" :open-url="openUrl" @invert-visibility="invertVisibility(vm)" @clear-sending="clearSending(vm)" />
+			<SideMenu :vm="vm" @invert-visibility="invertVisibility(vm)" @clear-sending="clearSending(vm)" />
 
 			<div class="flex-1 flex flex-col bg-white w-full max-w-full min-w-0 min-h-full rounded-tl-[3rem] p-12 h-1 overflow-y-scroll">
 				<ContentStatus :vm="vm" @outbound-payload="(el: OutboundPayload) => outboundPayload = el" @discovery-running="discoveryRunning = true;" />
