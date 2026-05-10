@@ -174,7 +174,23 @@ pub fn local_mdns_ipv4_addrs() -> Vec<Ipv4Addr> {
     addrs
 }
 
-fn is_physical_lan_interface(name: &str) -> bool {
+pub fn ignored_mdns_interface_names() -> Vec<String> {
+    let Ok(if_addrs) = get_if_addrs() else {
+        return Vec::new();
+    };
+
+    let mut names = if_addrs
+        .into_iter()
+        .map(|if_addr| if_addr.name)
+        .filter(|name| !is_physical_lan_interface(name))
+        .collect::<Vec<_>>();
+
+    names.sort();
+    names.dedup();
+    names
+}
+
+pub fn is_physical_lan_interface(name: &str) -> bool {
     const VIRTUAL_PREFIXES: &[&str] = &[
         "br-", "docker", "lxc", "lxd", "tap", "tun", "veth", "virbr", "vmnet", "wg", "zt",
     ];
