@@ -14,6 +14,15 @@ defineProps({
 });
 
 const emit = defineEmits(['openSettings']);
+
+function formatVersion(version?: string | null) {
+	if (!version) return '';
+
+	const alpha = version.match(/^(\d+\.\d+\.\d+)-alpha(?:\.\d+)?$/);
+	if (alpha) return `alpha ${alpha[1]}`;
+
+	return `v${version}`;
+}
 </script>
 
 <template>
@@ -34,13 +43,13 @@ const emit = defineEmits(['openSettings']);
 				@click="vm.new_version && openUrl('https://github.com/EladBG-code/rquickshare-pi/releases/latest')">
 				<span v-if="vm.new_version">Update available</span>
 				<p>
-					v{{ vm.version }}
+					{{ formatVersion(vm.version) }}
 				</p>
 				<p v-if="vm.new_version" class="text-lg">
 					→
 				</p>
 				<p v-if="vm.new_version">
-					v{{ vm.new_version }}
+					{{ formatVersion(vm.new_version) }}
 				</p>
 			</div>
 			<div class="btn px-3 rounded-xl active:scale-95 transition duration-150 ease-in-out" @click="emit('openSettings')">
