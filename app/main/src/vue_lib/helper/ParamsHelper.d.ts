@@ -27,6 +27,7 @@ export interface TauriVM {
     hostname: string | undefined;
     settingsOpen: boolean;
     new_version: string | null;
+    latest_release_url: string | null;
     enable: () => Promise<void>;
     disable: () => Promise<void>;
     invoke: (cmd: string, args?: InvokeArgs) => Promise<unknown>

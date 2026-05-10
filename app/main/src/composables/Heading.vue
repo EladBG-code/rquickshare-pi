@@ -40,7 +40,7 @@ function formatVersion(version?: string | null) {
 			<div
 				class="flex items-center gap-2 text-sm transition duration-150 ease-in-out"
 				:class="{'btn active:scale-95': vm.new_version}"
-				@click="vm.new_version && openUrl('https://github.com/EladBG-code/rquickshare-pi/releases/latest')">
+				@click="vm.new_version && openUrl(vm.latest_release_url ?? 'https://github.com/EladBG-code/rquickshare-pi/releases/latest')">
 				<span v-if="vm.new_version">Update available</span>
 				<p>
 					{{ formatVersion(vm.version) }}
@@ -58,7 +58,7 @@ function formatVersion(version?: string | null) {
 				aria-label="Donate on Ko-fi"
 				title="Donate on Ko-fi"
 				@click="openUrl('https://ko-fi.com/eladbg')">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="24" height="24">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 16 48 34" width="28" height="28">
 					<path d="M14 18h33c4 0 7 3 7 7v3c0 5-4 9-9 9h-2c-3 7-10 11-20 11h-2C13 48 8 43 8 35V24c0-3 3-6 6-6Zm34 8v3c0 2-1 4-3 5h1c3 0 5-2 5-5v-3c0-2-2-4-4-4h-1c1 1 2 2 2 4ZM21 23c-5 0-9 4-9 9v3c0 6 4 9 10 9h2c10 0 16-5 16-14v-4c0-2-1-3-3-3H21Z" />
 					<path d="M25 38c-6-4-10-8-10-12 0-3 2-5 5-5 2 0 4 1 5 3 1-2 3-3 5-3 3 0 5 2 5 5 0 4-4 8-10 12Z" />
 				</svg>

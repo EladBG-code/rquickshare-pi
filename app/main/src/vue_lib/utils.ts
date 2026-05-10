@@ -4,7 +4,13 @@ import { autostartKey, DisplayedItem, downloadPathKey, numberToVisibility, realc
 import { SendInfo } from '@martichou/core_lib/bindings/SendInfo';
 import { ChannelMessage } from '@martichou/core_lib/bindings/ChannelMessage';
 import { ChannelAction } from '@martichou/core_lib';
-import { gt } from 'semver';
+import { confirm } from '@tauri-apps/plugin-dialog';
+import { open } from '@tauri-apps/plugin-shell';
+import { gt, valid } from 'semver';
+
+const repoUrl = 'https://github.com/EladBG-code/rquickshare-pi';
+const releasesApiUrl = `${repoUrl.replace('https://github.com/', 'https://api.github.com/repos/')}/releases?per_page=30`;
+const latestReleaseUrl = `${repoUrl}/releases/latest`;
 
 function _displayedItems(vm: TauriVM): Array<DisplayedItem> {
 	const ndisplayed = new Array<DisplayedItem>();
@@ -169,6 +175,37 @@ function getProgress(item: DisplayedItem): string {
 	return `--progress: ${value}`;
 }
 
+function normalizeVersion(version?: string | null): string | null {
+	if (!version) return null;
+
+	const normalized = version.trim().replace(/^v/i, '').replace(/\s+/g, '-');
+	return valid(normalized);
+}
+
+function formatUpdateVersion(version: string): string {
+	const alpha = version.match(/^(\d+\.\d+\.\d+)-alpha(?:\.\d+)?$/);
+	if (alpha) return `v${alpha[1]} alpha`;
+
+	return `v${version}`;
+}
+
+function getHighestRelease(releases: unknown): { version: string, url: string } | null {
+	if (!Array.isArray(releases)) return null;
+
+	return releases.reduce<{ version: string, url: string } | null>((latest, release) => {
+		if (!release || typeof release !== 'object' || 'draft' in release && release.draft) return latest;
+
+		const tagName = 'tag_name' in release && typeof release.tag_name === 'string' ? release.tag_name : null;
+		const version = normalizeVersion(tagName);
+		if (!version) return latest;
+
+		const url = 'html_url' in release && typeof release.html_url === 'string' ? release.html_url : latestReleaseUrl;
+		if (!latest || gt(version, latest.version)) return { version, url };
+
+		return latest;
+	}, null);
+}
+
 async function setDownloadPath(vm: TauriVM, dest: string) {
 	await vm.invoke('change_download_path', { message: dest });
 	await vm.store.set(downloadPathKey, dest);
@@ -180,18 +217,46 @@ async function getDownloadPath(vm: TauriVM) {
 	vm.downloadPath = await vm.store.get(downloadPathKey) ?? undefined;
 }
 
-async function getLatestVersion(vm: TauriVM) {
+async function getLatestVersion(vm: TauriVM, prompt = false) {
 	try {
-		const response = await fetch('https://api.github.com/repos/EladBG-code/rquickshare-pi/releases/latest');
+		const response = await fetch(releasesApiUrl, {
+			headers: {
+				Accept: 'application/vnd.github+json',
+			},
+		});
 		if (!response.ok) {
 			throw new Error(`Error: ${response.status} ${response.statusText}`);
 		}
-		const data = await response.json();
-		const new_version = data.tag_name.substring(1);
-		console.log(`Latest version: ${vm.version} vs ${new_version}`);
+		const latestRelease = getHighestRelease(await response.json());
+		const currentVersion = normalizeVersion(vm.version);
+		const newVersion = latestRelease?.version ?? null;
+		const releaseUrl = latestRelease?.url ?? latestReleaseUrl;
 
-		if (vm.version && gt(new_version, vm.version)) {
-			vm.new_version = new_version;
+		console.log(`Latest version: ${currentVersion} vs ${newVersion}`);
+
+		if (!currentVersion || !newVersion || !gt(newVersion, currentVersion)) {
+			vm.new_version = null;
+			vm.latest_release_url = null;
+			return;
+		}
+
+		vm.new_version = newVersion;
+		vm.latest_release_url = releaseUrl;
+
+		if (!prompt) return;
+
+		const shouldUpdate = await confirm(
+			`RQuickShare Pi ${formatUpdateVersion(newVersion)} is available.\n\nYou are running ${formatUpdateVersion(currentVersion)}. Open GitHub to download the latest release?`,
+			{
+				title: 'RQuickShare Pi update available',
+				kind: 'info',
+				okLabel: 'Open update',
+				cancelLabel: 'Later',
+			}
+		);
+
+		if (shouldUpdate) {
+			await open(releaseUrl);
 		}
 	} catch (err) {
 		console.error(err);

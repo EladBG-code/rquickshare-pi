@@ -228,6 +228,7 @@ export default {
 			settingsOpen: ref<boolean>(false),
 
 			new_version: opt<string>(),
+			latest_release_url: opt<string>(),
 		};
 	},
 
@@ -332,7 +333,7 @@ export default {
 				})
 			);
 
-			await this.getLatestVersion(this);
+			void this.getLatestVersion(this, true);
 		});
 	},
 
