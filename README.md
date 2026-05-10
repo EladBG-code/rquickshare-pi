@@ -12,12 +12,7 @@
   </p>
 
   <p>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/actions">
-      <img src="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml/badge.svg" alt="Build status" />
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/actions">
-      <img src="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml/badge.svg" alt="Lint status" />
-    </a>
+    Hardware target: Raspberry Pi OS 64-bit on ARM64. Support is claimed only after local Pi build/run testing.
   </p>
 </div>
 

@@ -1,0 +1,38 @@
+name: Bug report
+description: Report an RQuickShare Pi crash or transfer problem.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing RQuickShare Pi on real hardware.
+
+        If the app created an error report `.txt` file, attach it here.
+  - type: input
+    id: pi_model
+    attributes:
+      label: Raspberry Pi model
+      placeholder: Raspberry Pi 5
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: Raspberry Pi OS 64-bit Bookworm
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include what you were sending, source/target devices, and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or attached report
+      description: Paste the important log lines or attach the generated error report file.

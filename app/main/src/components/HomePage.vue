@@ -248,6 +248,7 @@ export default {
 			await this.getRealclose(this);
 			await this.getStartMinimized(this);
 			await this.getDownloadPath(this);
+			await this.promptLatestErrorReport(this);
 
 			// Check permission for notification
 			let permissionGranted = await isPermissionGranted();

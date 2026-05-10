@@ -2,6 +2,7 @@
 import { utils } from '../vue_lib';
 import { PropType } from 'vue';
 import { TauriVM } from '../vue_lib/helper/ParamsHelper';
+import { open } from '@tauri-apps/plugin-shell';
 
 const props = defineProps({
 	vm: {
@@ -24,6 +25,10 @@ function openDownloadPicker() {
 
 		await utils.setDownloadPath(props.vm, el as string);
 	});
+}
+
+function openUpstream() {
+	open('https://github.com/Martichou/rquickshare');
 }
 </script>
 
@@ -64,6 +69,18 @@ function openDownloadPicker() {
 							> {{ vm.downloadPath ?? 'OS User\'s download folder' }}
 						</span>
 					</label>
+				</div>
+				<div class="border-t border-gray-200 mt-3 pt-3 px-3 text-xs leading-relaxed text-gray-600">
+					<p>
+						Based on
+						<button
+							type="button"
+							class="text-blue-600 hover:underline"
+							@click="openUpstream">
+							RQuickShare
+						</button>
+						by Martin ANDRE. This fork keeps the upstream GPL-3.0 license, credits, and project history.
+					</p>
 				</div>
 			</div>
 		</div>

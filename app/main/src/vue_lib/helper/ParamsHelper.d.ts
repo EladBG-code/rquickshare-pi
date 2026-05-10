@@ -32,6 +32,7 @@ export interface TauriVM {
     disable: () => Promise<void>;
     invoke: (cmd: string, args?: InvokeArgs) => Promise<unknown>
     setVisibility: (vm: TauriVM, visibility: Visibility) => Promise<void>;
+    setDeviceName: (vm: TauriVM, deviceName: string) => Promise<void>;
 
     displayedIsEmpty: boolean;
     displayedItems: DisplayedItem[];

@@ -3,8 +3,11 @@ use std::sync::Arc;
 use bluer::adv::{Advertisement, AdvertisementHandle, Type};
 use bluer::UuidExt;
 use bytes::Bytes;
+use tokio::sync::watch;
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
+
+use crate::Visibility;
 
 const SERVICE_DATA: Bytes = Bytes::from_static(&[
     252, 18, 142, 1, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 191, 45, 91, 160, 225, 216, 117, 36, 202, 0,
@@ -55,6 +58,65 @@ impl BleAdvertiser {
         drop(handle);
 
         Ok(())
+    }
+
+    pub async fn run_for_visibility(
+        &self,
+        ctk: CancellationToken,
+        mut visibility_receiver: watch::Receiver<Visibility>,
+    ) -> Result<(), anyhow::Error> {
+        info!(
+            "{INNER_NAME}: visibility-controlled advertising on Bluetooth adapter {} with address {}",
+            self.adapter.name(),
+            self.adapter.address().await?
+        );
+
+        let service_uuid = Uuid::from_u16(0xFE2C);
+        let mut handle = if *visibility_receiver.borrow() == Visibility::Invisible {
+            None
+        } else {
+            Some(self.start_advertising(service_uuid).await?)
+        };
+
+        loop {
+            tokio::select! {
+                _ = ctk.cancelled() => {
+                    info!("{INNER_NAME}: tracker cancelled, returning");
+                    drop(handle);
+                    return Ok(());
+                }
+                changed = visibility_receiver.changed() => {
+                    changed?;
+                    let visibility = *visibility_receiver.borrow_and_update();
+                    debug!("{INNER_NAME}: visibility changed: {visibility:?}");
+
+                    if visibility == Visibility::Invisible {
+                        handle = None;
+                    } else if handle.is_none() {
+                        handle = Some(self.start_advertising(service_uuid).await?);
+                    }
+                }
+            }
+        }
+    }
+
+    async fn start_advertising(
+        &self,
+        service_uuid: Uuid,
+    ) -> Result<AdvertisementHandle, anyhow::Error> {
+        match self
+            .advertise(service_uuid, SERVICE_DATA, Type::Broadcast)
+            .await
+        {
+            Ok(handle) => Ok(handle),
+            Err(err) => {
+                warn!(
+                    "{INNER_NAME}: broadcast advertisement failed ({err}); retrying as peripheral"
+                );
+                self.advertise(service_uuid, SERVICE_DATA, Type::Peripheral)
+                    .await
+            }
+        }
     }
 
     async fn advertise(

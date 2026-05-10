@@ -1,9 +1,13 @@
 mod change_download_path;
 pub use change_download_path::*;
+mod change_device_name;
+pub use change_device_name::*;
 mod change_visibility;
 pub use change_visibility::*;
 mod discovery;
 pub use discovery::*;
+mod error_report;
+pub use error_report::*;
 mod get_hostname;
 pub use get_hostname::*;
 mod send_payload;

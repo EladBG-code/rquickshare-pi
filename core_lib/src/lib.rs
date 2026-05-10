@@ -30,7 +30,7 @@ mod utils;
 
 pub use hdl::{EndpointInfo, OutboundPayload, State, Visibility};
 pub use manager::SendInfo;
-pub use utils::DeviceType;
+pub use utils::{default_device_name, normalize_device_name, DeviceType};
 
 pub mod sharing_nearby {
     include!(concat!(env!("OUT_DIR"), "/sharing.nearby.rs"));
@@ -61,6 +61,8 @@ pub struct RQS {
     // Used to trigger a change in the mDNS visibility (and later on, BLE)
     pub visibility_sender: Arc<Mutex<watch::Sender<Visibility>>>,
     visibility_receiver: watch::Receiver<Visibility>,
+    pub device_name_sender: Arc<Mutex<watch::Sender<String>>>,
+    device_name_receiver: watch::Receiver<String>,
 
     // Only used to send the info "a nearby device is sharing"
     ble_sender: broadcast::Sender<()>,
@@ -82,6 +84,15 @@ impl RQS {
         port_number: Option<u32>,
         download_path: Option<PathBuf>,
     ) -> Self {
+        Self::new_with_device_name(visibility, port_number, download_path, None)
+    }
+
+    pub fn new_with_device_name(
+        visibility: Visibility,
+        port_number: Option<u32>,
+        download_path: Option<PathBuf>,
+        device_name: Option<String>,
+    ) -> Self {
         let mut guard = CUSTOM_DOWNLOAD.write().unwrap();
         *guard = download_path;
 
@@ -91,6 +102,8 @@ impl RQS {
         // Define default visibility as per the args inside the new()
         let (visibility_sender, visibility_receiver) = watch::channel(Visibility::Invisible);
         let _ = visibility_sender.send(visibility);
+        let device_name = normalize_device_name(&device_name.unwrap_or_else(default_device_name));
+        let (device_name_sender, device_name_receiver) = watch::channel(device_name);
 
         Self {
             tracker: None,
@@ -98,6 +111,8 @@ impl RQS {
             discovery_ctk: None,
             visibility_sender: Arc::new(Mutex::new(visibility_sender)),
             visibility_receiver,
+            device_name_sender: Arc::new(Mutex::new(device_name_sender)),
+            device_name_receiver,
             ble_sender,
             port_number,
             message_sender,
@@ -130,6 +145,7 @@ impl RQS {
             tcp_listener,
             self.message_sender.clone(),
             send_channel.1,
+            self.device_name_receiver.clone(),
         )?;
         let ctk = ctoken.clone();
         tracker.spawn(async move { server.run(ctk).await });
@@ -143,6 +159,25 @@ impl RQS {
             }
         }
 
+        #[cfg(all(feature = "experimental", target_os = "linux"))]
+        {
+            let visibility_receiver = self.visibility_receiver.clone();
+            let ctk_blea = ctoken.clone();
+            tracker.spawn(async move {
+                let blea = match BleAdvertiser::new().await {
+                    Ok(b) => b,
+                    Err(e) => {
+                        error!("Couldn't init BleAdvertiser: {}", e);
+                        return;
+                    }
+                };
+
+                if let Err(e) = blea.run_for_visibility(ctk_blea, visibility_receiver).await {
+                    error!("Couldn't start BleAdvertiser: {}", e);
+                }
+            });
+        }
+
         // Start MDnsServer in own "task"
         let mut mdns = MDnsServer::new(
             endpoint_id[..4].try_into()?,
@@ -150,6 +185,7 @@ impl RQS {
             self.ble_sender.subscribe(),
             self.visibility_sender.clone(),
             self.visibility_receiver.clone(),
+            self.device_name_receiver.clone(),
         )?;
         let ctk = ctoken.clone();
         tracker.spawn(async move { mdns.run(ctk).await });
@@ -207,6 +243,16 @@ impl RQS {
             .lock()
             .unwrap()
             .send_modify(|state| *state = nv);
+    }
+
+    pub fn change_device_name(&mut self, name: String) -> String {
+        let normalized = normalize_device_name(&name);
+        self.device_name_sender
+            .lock()
+            .unwrap()
+            .send_modify(|state| *state = normalized.clone());
+
+        normalized
     }
 
     pub async fn stop(&mut self) {

@@ -28,7 +28,8 @@ use tokio::sync::{broadcast, mpsc, watch};
 use crate::logger::set_up_logging;
 use crate::notification::{send_request_notification, send_temporarily_notification};
 use crate::store::{
-    get_download_path, get_port, get_realclose, get_visibility, init_default, set_visibility,
+    get_device_name, get_download_path, get_port, get_realclose, get_visibility, init_default,
+    set_visibility,
 };
 
 mod cmds;
@@ -142,6 +143,10 @@ fn setup_tray(app: &tauri::App) -> Result<(), anyhow::Error> {
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+    std::panic::set_hook(Box::new(|panic_info| {
+        let _ = cmds::write_native_error_report("panic", &panic_info.to_string());
+    }));
+
     // Define tauri async runtime to be tokio
     tauri::async_runtime::set(tokio::runtime::Handle::current());
 
@@ -162,12 +167,15 @@ async fn main() -> Result<(), anyhow::Error> {
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             cmds::change_download_path,
+            cmds::change_device_name,
             cmds::change_visibility,
+            cmds::get_latest_error_report,
             cmds::start_discovery,
             cmds::stop_discovery,
             cmds::get_hostname,
             cmds::send_payload,
             cmds::send_to_rs,
+            cmds::write_error_report,
         ])
         .setup(|app| {
             // Setting up logging inside file for the app
@@ -190,6 +198,7 @@ async fn main() -> Result<(), anyhow::Error> {
             let visibility = get_visibility(app.app_handle());
             let port_number = get_port(app.app_handle());
             let download_path = get_download_path(app.app_handle());
+            let device_name = get_device_name(app.app_handle());
 
             let app_handle = app.app_handle().clone();
             // This is not optimal, but until I find a better way to init log
@@ -199,7 +208,12 @@ async fn main() -> Result<(), anyhow::Error> {
                 tauri::async_runtime::block_on(async move {
                     trace!("Beginning of RQS start");
                     // Start the RQuickShare Pi service
-                    let mut rqs = RQS::new(visibility, port_number, download_path);
+                    let mut rqs = RQS::new_with_device_name(
+                        visibility,
+                        port_number,
+                        download_path,
+                        Some(device_name),
+                    );
                     let (sender_file, ble_receiver) = rqs.run().await.unwrap();
 
                     // Define state for tauri app

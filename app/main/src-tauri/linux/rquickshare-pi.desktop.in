@@ -1,5 +1,5 @@
 [Desktop Entry]
-Categories={{categories}}
+Categories=Utility;
 Comment=RQuickShare Pi
 Exec={{exec}}
 Icon={{icon}}

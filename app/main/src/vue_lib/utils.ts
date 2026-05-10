@@ -1,6 +1,6 @@
 import { Visibility } from '@martichou/core_lib/bindings/Visibility';
 import { TauriVM } from './helper/ParamsHelper';
-import { autostartKey, DisplayedItem, downloadPathKey, numberToVisibility, realcloseKey, startminimizedKey, stateToDisplay, visibilityKey, visibilityToNumber } from './types';
+import { autostartKey, DisplayedItem, downloadPathKey, lastErrorReportPathKey, numberToVisibility, realcloseKey, startminimizedKey, stateToDisplay, visibilityKey, visibilityToNumber } from './types';
 import { SendInfo } from '@martichou/core_lib/bindings/SendInfo';
 import { ChannelMessage } from '@martichou/core_lib/bindings/ChannelMessage';
 import { ChannelAction } from '@martichou/core_lib';
@@ -11,6 +11,7 @@ import { gt, valid } from 'semver';
 const repoUrl = 'https://github.com/EladBG-code/rquickshare-pi';
 const releasesApiUrl = `${repoUrl.replace('https://github.com/', 'https://api.github.com/repos/')}/releases?per_page=30`;
 const latestReleaseUrl = `${repoUrl}/releases/latest`;
+const issueUrl = `${repoUrl}/issues/new?template=bug_report.yml`;
 
 function _displayedItems(vm: TauriVM): Array<DisplayedItem> {
 	const ndisplayed = new Array<DisplayedItem>();
@@ -217,6 +218,31 @@ async function getDownloadPath(vm: TauriVM) {
 	vm.downloadPath = await vm.store.get(downloadPathKey) ?? undefined;
 }
 
+async function setDeviceName(vm: TauriVM, deviceName: string) {
+	const normalized = await vm.invoke('change_device_name', { message: deviceName });
+	vm.hostname = normalized as string;
+}
+
+async function promptLatestErrorReport(vm: TauriVM) {
+	const path = await vm.invoke('get_latest_error_report') as string | null;
+	if (!path || await vm.store.get(lastErrorReportPathKey) === path) return;
+
+	await vm.store.set(lastErrorReportPathKey, path);
+	await vm.store.save();
+
+	const shouldOpenIssue = await confirm(
+		`RQuickShare Pi found an error report:\n\n${path}\n\nOpen GitHub Issues so you can upload it?`,
+		{
+			title: 'RQuickShare Pi error report',
+			kind: 'warning',
+			okLabel: 'Open issues',
+			cancelLabel: 'Later',
+		}
+	);
+
+	if (shouldOpenIssue) await open(issueUrl);
+}
+
 async function getLatestVersion(vm: TauriVM, prompt = false) {
 	try {
 		const response = await fetch(releasesApiUrl, {
@@ -281,6 +307,8 @@ export const utils = {
 	getProgress,
 	setDownloadPath,
 	getDownloadPath,
+	setDeviceName,
+	promptLatestErrorReport,
 	getLatestVersion,
 	setStartMinimized,
 	getStartMinimized

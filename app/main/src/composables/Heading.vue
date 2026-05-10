@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, ref } from 'vue';
 import { TauriVM } from '../vue_lib/helper/ParamsHelper';
 
-defineProps({
+const props = defineProps({
 	vm: {
 		type: Object as PropType<TauriVM>,
 		required: true
@@ -14,6 +14,9 @@ defineProps({
 });
 
 const emit = defineEmits(['openSettings']);
+const editingName = ref(false);
+const draftName = ref('');
+const releasePageUrl = 'https://github.com/EladBG-code/rquickshare-pi/releases';
 
 function formatVersion(version?: string | null) {
 	if (!version) return '';
@@ -22,6 +25,22 @@ function formatVersion(version?: string | null) {
 	if (alpha) return `v${alpha[1]} alpha`;
 
 	return `v${version}`;
+}
+
+function startEditingName() {
+	draftName.value = props.vm.hostname ?? '';
+	editingName.value = true;
+}
+
+async function saveDeviceName() {
+	const name = draftName.value.trim();
+	if (!name) {
+		editingName.value = false;
+		return;
+	}
+
+	await props.vm.setDeviceName(props.vm, name);
+	editingName.value = false;
 }
 </script>
 
@@ -32,15 +51,36 @@ function formatVersion(version?: string | null) {
 			<h4 class="text-md">
 				Device name
 			</h4>
-			<h2 class="text-2xl font-medium">
-				{{ vm.hostname }}
-			</h2>
+			<div class="flex items-center gap-2">
+				<input
+					v-if="editingName"
+					v-model="draftName"
+					class="text-2xl font-medium bg-white bg-opacity-70 rounded-xl px-2 py-1 w-56 focus:outline-none"
+					maxlength="64"
+					autofocus
+					@keyup.enter="saveDeviceName"
+					@keyup.escape="editingName = false"
+					@blur="saveDeviceName">
+				<h2 v-else class="text-2xl font-medium">
+					{{ vm.hostname }}
+				</h2>
+				<button
+					type="button"
+					class="btn px-2 rounded-xl active:scale-95 transition duration-150 ease-in-out"
+					aria-label="Edit device name"
+					title="Edit device name"
+					@click="startEditingName">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="18" height="18">
+						<path d="M12 46 10 55l9-2 31-31-7-7-31 31Zm38-38 6 6c2 2 2 5 0 7l-3 3-13-13 3-3c2-2 5-2 7 0Z" />
+					</svg>
+				</button>
+			</div>
 		</div>
 		<div class="flex justify-center items-center gap-3">
 			<div
-				class="flex items-center gap-2 text-sm transition duration-150 ease-in-out"
-				:class="{'btn active:scale-95': vm.new_version}"
-				@click="vm.new_version && openUrl(vm.latest_release_url ?? 'https://github.com/EladBG-code/rquickshare-pi/releases/latest')">
+				class="btn flex items-center gap-2 text-sm transition duration-150 ease-in-out active:scale-95"
+				title="Open releases"
+				@click="openUrl(vm.new_version ? (vm.latest_release_url ?? releasePageUrl) : releasePageUrl)">
 				<span v-if="vm.new_version">Update available</span>
 				<p>
 					{{ formatVersion(vm.version) }}

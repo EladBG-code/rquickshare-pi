@@ -58,15 +58,41 @@ impl RemoteDeviceInfo {
         endpoint_info.extend((0..16).map(|_| rand::rng().random_range(0..=255)));
 
         // Device name in UTF-8 prefixed with 1-byte length
-        let mut name_chars = self.name.as_bytes().to_vec();
-        if name_chars.len() > 255 {
-            name_chars.truncate(255);
-        }
+        let name = normalize_device_name(&self.name);
+        let name_chars = name.as_bytes().to_vec();
         endpoint_info.push(name_chars.len() as u8);
         endpoint_info.extend(name_chars);
 
         endpoint_info
     }
+}
+
+pub fn default_device_name() -> String {
+    sys_metrics::host::get_hostname().unwrap_or_else(|_| String::from("RQuickShare Pi"))
+}
+
+pub fn normalize_device_name(device_name: &str) -> String {
+    let trimmed = device_name.trim();
+    let normalized = if trimmed.is_empty() {
+        default_device_name()
+    } else {
+        trimmed.to_string()
+    };
+
+    truncate_utf8_bytes(&normalized, 64)
+}
+
+fn truncate_utf8_bytes(value: &str, max_bytes: usize) -> String {
+    if value.len() <= max_bytes {
+        return value.to_string();
+    }
+
+    let mut end = max_bytes;
+    while !value.is_char_boundary(end) {
+        end -= 1;
+    }
+
+    value[..end].to_string()
 }
 
 pub fn gen_mdns_name(endpoint_id: [u8; 4]) -> String {
@@ -96,6 +122,7 @@ pub fn gen_mdns_endpoint_info(device_type: u8, device_name: &str) -> String {
     let unknown_bytes = rand::rng().random::<[u8; 16]>();
     record.extend_from_slice(&unknown_bytes);
 
+    let device_name = normalize_device_name(device_name);
     let device_name = device_name.as_bytes();
     let length = device_name.len() as u8;
     record.push(length);
