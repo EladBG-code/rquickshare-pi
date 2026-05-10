@@ -12,7 +12,8 @@ use crate::utils::default_device_name;
 use crate::Visibility;
 
 const SERVICE_DATA: Bytes = Bytes::from_static(&[
-    252, 18, 142, 1, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 191, 45, 91, 160, 225, 216, 117, 36, 202, 0,
+    // Nearby Share fast-initiation model id fc128e + V1 notify metadata.
+    0xfc, 0x12, 0x8e, 0x00, 0x42,
 ]);
 
 const INNER_NAME: &str = "BleAdvertiser";
@@ -153,10 +154,13 @@ impl BleAdvertiser {
         let is_peripheral = advertisement_type == Type::Peripheral;
         Advertisement {
             advertisement_type,
+            service_uuids: std::iter::once(service_uuid).collect(),
             service_data: [(service_uuid, adv_data.into())].into(),
             discoverable: is_peripheral.then_some(true),
             discoverable_timeout: is_peripheral.then_some(Duration::from_secs(0)),
             local_name: is_peripheral.then(default_device_name),
+            min_interval: Some(Duration::from_millis(100)),
+            max_interval: Some(Duration::from_millis(100)),
             ..Default::default()
         }
     }
@@ -187,5 +191,15 @@ impl BleAdvertiser {
                 "{INNER_NAME}: could not restore adapter discoverable timeout={discoverable_timeout}: {err}"
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SERVICE_DATA;
+
+    #[test]
+    fn fast_initiation_payload_matches_nearby_share_shape() {
+        assert_eq!(SERVICE_DATA.as_ref(), &[0xfc, 0x12, 0x8e, 0x00, 0x42]);
     }
 }
