@@ -1,5 +1,5 @@
 <template>
-	<div class="flex flex-col w-full h-full bg-green-50 max-w-full max-h-full overflow-hidden">
+	<div class="flex flex-col w-full h-full bg-rose-50 max-w-full max-h-full overflow-hidden">
 		<ToastNotification />
 		<SettingsModal :vm="vm" @close="settingsOpen = false" />
 
@@ -12,7 +12,7 @@
 				<ContentStatus :vm="vm" @outbound-payload="(el: OutboundPayload) => outboundPayload = el" @discovery-running="discoveryRunning = true;" />
 
 				<div
-					v-for="item in displayedItems" :key="item.id" class="w-full rounded-3xl flex flex-row gap-6 p-4 mb-4 bg-green-100"
+					v-for="item in displayedItems" :key="item.id" class="w-full rounded-3xl flex flex-row gap-6 p-4 mb-4 bg-rose-100"
 					:class="{'cursor-pointer': item.endpoint}" @click="item.endpoint && sendInfo(vm, item.id)">
 					<!-- Loader and image of the device type & pin_code -->
 					<ItemSide :item="item" />

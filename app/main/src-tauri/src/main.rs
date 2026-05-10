@@ -11,7 +11,6 @@ use std::sync::{Arc, Mutex};
 use rqs_lib::channel::{ChannelDirection, ChannelMessage};
 use rqs_lib::{EndpointInfo, SendInfo, State, Visibility, RQS};
 use store::get_startminimized;
-#[cfg(target_os = "macos")]
 use tauri::image::Image;
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
@@ -91,13 +90,15 @@ async fn main() -> Result<(), anyhow::Error> {
                 .items(&[&show, &quit])
                 .build()?;
 
-            #[cfg(target_os = "macos")]
-            let icon = Image::from_bytes(include_bytes!("../icons/tray.png")).unwrap();
-            #[cfg(not(target_os = "macos"))]
-            let icon = app.default_window_icon().unwrap().clone();
+            let window_icon = Image::from_bytes(include_bytes!("../icons/icon.png")).unwrap();
+            let tray_icon = Image::from_bytes(include_bytes!("../icons/tray.png")).unwrap();
+
+            if let Some(window) = app.get_webview_window("main") {
+                window.set_icon(window_icon)?;
+            }
 
             let tray = TrayIconBuilder::new()
-                .icon(icon)
+                .icon(tray_icon)
                 .menu(&menu)
                 .on_menu_event(move |app, event| match event.id().as_ref() {
                     "show" => {
@@ -112,7 +113,10 @@ async fn main() -> Result<(), anyhow::Error> {
                 })
                 .build(app)?;
 
+            #[cfg(target_os = "macos")]
             let _ = tray.set_icon_as_template(true);
+            #[cfg(not(target_os = "macos"))]
+            let _ = tray.set_icon_as_template(false);
 
             // Fetch initial configuration values
             let visibility = get_visibility(app.app_handle());

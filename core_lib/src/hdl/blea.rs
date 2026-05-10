@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use bluer::adv::Advertisement;
+use bluer::adv::{Advertisement, AdvertisementHandle, Type};
 use bluer::UuidExt;
 use bytes::Bytes;
 use tokio_util::sync::CancellationToken;
@@ -36,10 +36,16 @@ impl BleAdvertiser {
         );
 
         let service_uuid = Uuid::from_u16(0xFE2C);
-        let handle = self
-            .adapter
-            .advertise(self.get_advertisment(service_uuid, SERVICE_DATA))
-            .await?;
+        let handle = match self.advertise(service_uuid, SERVICE_DATA, Type::Broadcast).await {
+            Ok(handle) => handle,
+            Err(err) => {
+                warn!(
+                    "{INNER_NAME}: broadcast advertisement failed ({err}); retrying as peripheral"
+                );
+                self.advertise(service_uuid, SERVICE_DATA, Type::Peripheral).await?
+            }
+        };
+
         ctk.cancelled().await;
         info!("{INNER_NAME}: tracker cancelled, returning");
         drop(handle);
@@ -47,9 +53,26 @@ impl BleAdvertiser {
         Ok(())
     }
 
-    fn get_advertisment(&self, service_uuid: Uuid, adv_data: Bytes) -> Advertisement {
+    async fn advertise(
+        &self,
+        service_uuid: Uuid,
+        adv_data: Bytes,
+        advertisement_type: Type,
+    ) -> Result<AdvertisementHandle, anyhow::Error> {
+        self.adapter
+            .advertise(self.get_advertisement(service_uuid, adv_data, advertisement_type))
+            .await
+            .map_err(Into::into)
+    }
+
+    fn get_advertisement(
+        &self,
+        service_uuid: Uuid,
+        adv_data: Bytes,
+        advertisement_type: Type,
+    ) -> Advertisement {
         Advertisement {
-            advertisement_type: bluer::adv::Type::Broadcast,
+            advertisement_type,
             service_data: [(service_uuid, adv_data.into())].into(),
             ..Default::default()
         }

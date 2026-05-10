@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories={{categories}}
+Comment=RQuickShare Pi
+Exec={{exec}}
+Icon={{icon}}
+Name={{name}}
+StartupWMClass=rquickshare-pi
+Terminal=false
+Type=Application

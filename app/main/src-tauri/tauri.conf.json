@@ -1,7 +1,7 @@
 {
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": "deb",
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
@@ -29,7 +29,8 @@
     },
     "linux": {
       "deb": {
-        "depends": []
+        "depends": [],
+        "desktopTemplate": "linux/rquickshare-pi.desktop.in"
       }
     }
   },
