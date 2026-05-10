@@ -10,7 +10,8 @@ use tokio_util::sync::CancellationToken;
 use ts_rs::TS;
 
 use crate::utils::{
-    gen_mdns_endpoint_info, gen_mdns_name, local_mdns_ipv4_addrs, mdns_host_name, DeviceType,
+    gen_mdns_endpoint_info, gen_mdns_name, ignored_mdns_interface_names, local_mdns_ipv4_addrs,
+    mdns_host_name, DeviceType,
 };
 
 const INNER_NAME: &str = "MDnsServer";
@@ -65,8 +66,16 @@ impl MDnsServer {
             &device_name_receiver.borrow(),
         )?;
 
+        let daemon = ServiceDaemon::new()?;
+        for interface_name in ignored_mdns_interface_names() {
+            debug!("{INNER_NAME}: disabling mDNS on interface {interface_name}");
+            if let Err(err) = daemon.disable_interface(interface_name.as_str()) {
+                warn!("{INNER_NAME}: could not disable mDNS interface {interface_name}: {err}");
+            }
+        }
+
         Ok(Self {
-            daemon: ServiceDaemon::new()?,
+            daemon,
             service_info,
             endpoint_id,
             service_port,

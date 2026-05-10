@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::Duration;
 
 use bluer::adv::{Advertisement, AdvertisementHandle, Type};
 use bluer::UuidExt;
@@ -40,7 +41,9 @@ impl BleAdvertiser {
         );
 
         let service_uuid = Uuid::from_u16(0xFE2C);
-        self.set_discoverable(true).await;
+        let initial_discoverable = self.adapter.is_discoverable().await.unwrap_or(false);
+        let initial_discoverable_timeout = self.adapter.discoverable_timeout().await.unwrap_or(180);
+        self.set_visible_mode(true).await;
         let handle = match self
             .advertise(service_uuid, SERVICE_DATA, Type::Broadcast)
             .await
@@ -58,7 +61,8 @@ impl BleAdvertiser {
         ctk.cancelled().await;
         info!("{INNER_NAME}: tracker cancelled, returning");
         drop(handle);
-        self.set_discoverable(false).await;
+        self.restore_visible_mode(initial_discoverable, initial_discoverable_timeout)
+            .await;
 
         Ok(())
     }
@@ -76,10 +80,11 @@ impl BleAdvertiser {
 
         let service_uuid = Uuid::from_u16(0xFE2C);
         let initial_discoverable = self.adapter.is_discoverable().await.unwrap_or(false);
+        let initial_discoverable_timeout = self.adapter.discoverable_timeout().await.unwrap_or(180);
         let mut handle = if *visibility_receiver.borrow() == Visibility::Invisible {
             None
         } else {
-            self.set_discoverable(true).await;
+            self.set_visible_mode(true).await;
             Some(self.start_advertising(service_uuid).await?)
         };
 
@@ -88,7 +93,7 @@ impl BleAdvertiser {
                 _ = ctk.cancelled() => {
                     info!("{INNER_NAME}: tracker cancelled, returning");
                     drop(handle);
-                    self.set_discoverable(initial_discoverable).await;
+                    self.restore_visible_mode(initial_discoverable, initial_discoverable_timeout).await;
                     return Ok(());
                 }
                 changed = visibility_receiver.changed() => {
@@ -98,9 +103,9 @@ impl BleAdvertiser {
 
                     if visibility == Visibility::Invisible {
                         handle = None;
-                        self.set_discoverable(false).await;
+                        self.set_visible_mode(false).await;
                     } else if handle.is_none() {
-                        self.set_discoverable(true).await;
+                        self.set_visible_mode(true).await;
                         handle = Some(self.start_advertising(service_uuid).await?);
                     }
                 }
@@ -150,14 +155,37 @@ impl BleAdvertiser {
             advertisement_type,
             service_data: [(service_uuid, adv_data.into())].into(),
             discoverable: is_peripheral.then_some(true),
+            discoverable_timeout: is_peripheral.then_some(Duration::from_secs(0)),
             local_name: is_peripheral.then(default_device_name),
             ..Default::default()
         }
     }
 
-    async fn set_discoverable(&self, discoverable: bool) {
+    async fn set_visible_mode(&self, discoverable: bool) {
+        if discoverable {
+            if let Err(err) = self.adapter.set_discoverable_timeout(0).await {
+                warn!("{INNER_NAME}: could not disable adapter discoverable timeout: {err}");
+            }
+        }
+
         if let Err(err) = self.adapter.set_discoverable(discoverable).await {
             warn!("{INNER_NAME}: could not set adapter discoverable={discoverable}: {err}");
+        }
+    }
+
+    async fn restore_visible_mode(&self, discoverable: bool, discoverable_timeout: u32) {
+        if let Err(err) = self.adapter.set_discoverable(discoverable).await {
+            warn!("{INNER_NAME}: could not restore adapter discoverable={discoverable}: {err}");
+        }
+
+        if let Err(err) = self
+            .adapter
+            .set_discoverable_timeout(discoverable_timeout)
+            .await
+        {
+            warn!(
+                "{INNER_NAME}: could not restore adapter discoverable timeout={discoverable_timeout}: {err}"
+            );
         }
     }
 }
