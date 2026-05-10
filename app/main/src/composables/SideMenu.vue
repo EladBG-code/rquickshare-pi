@@ -27,7 +27,7 @@ function openKofi() {
 			</p>
 			<h4
 				tabindex="0" role="button" class="btn font-medium flex flex-row !justify-between w-full
-	            items-center rounded-xl active:scale-95 transition duration-150 ease-in-out p-3" @click="emits('invertVisibility')">
+	            items-center rounded-xl active:scale-95 transition duration-150 ease-in-out !px-3" @click="emits('invertVisibility')">
 				<span v-if="props.vm.visibility === 'Visible'">Always visible</span>
 				<span v-else-if="props.vm.visibility === 'Invisible'">Hidden from everyone</span>
 				<span v-else>Temporarily visible</span>
