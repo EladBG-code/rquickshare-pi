@@ -36,13 +36,17 @@ impl BleAdvertiser {
         );
 
         let service_uuid = Uuid::from_u16(0xFE2C);
-        let handle = match self.advertise(service_uuid, SERVICE_DATA, Type::Broadcast).await {
+        let handle = match self
+            .advertise(service_uuid, SERVICE_DATA, Type::Broadcast)
+            .await
+        {
             Ok(handle) => handle,
             Err(err) => {
                 warn!(
                     "{INNER_NAME}: broadcast advertisement failed ({err}); retrying as peripheral"
                 );
-                self.advertise(service_uuid, SERVICE_DATA, Type::Peripheral).await?
+                self.advertise(service_uuid, SERVICE_DATA, Type::Peripheral)
+                    .await?
             }
         };
 

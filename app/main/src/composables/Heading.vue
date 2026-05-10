@@ -73,7 +73,12 @@ function formatVersion(version?: string | null) {
 					<path fill-rule="evenodd" clip-rule="evenodd" d="M49 0C22 0 0 22 0 49c0 22 14 41 34 47 3 0 4-1 4-3v-9c-14 3-17-6-17-6-2-6-5-7-5-7-5-3 0-3 0-3 5 0 8 5 8 5 4 8 12 6 15 4 0-3 2-6 3-7-11-1-22-5-22-24 0-5 2-10 5-13-1-1-2-6 0-13 0 0 4-1 13 5 4-1 7-2 11-2s8 1 12 2c9-6 13-5 13-5 2 7 1 12 0 13 3 3 5 8 5 13 0 19-11 23-22 24 2 2 4 6 4 11v15c0 2 1 3 4 3 20-6 33-25 33-47C98 22 76 0 49 0Z" />
 				</svg>
 			</button>
-			<button type="button" class="btn px-3 rounded-xl active:scale-95 transition duration-150 ease-in-out" aria-label="Open settings" title="Open settings" @click="emit('openSettings')">
+			<button
+				type="button"
+				class="btn px-3 rounded-xl active:scale-95 transition duration-150 ease-in-out"
+				aria-label="Open settings"
+				title="Open settings"
+				@click="emit('openSettings')">
 				<svg
 					xmlns="http://www.w3.org/2000/svg" height="24"
 					viewBox="0 -960 960 960" width="24">
