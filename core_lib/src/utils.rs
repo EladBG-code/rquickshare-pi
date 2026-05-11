@@ -19,8 +19,8 @@ use ts_rs::TS;
 
 use crate::CUSTOM_DOWNLOAD;
 
-const ENDPOINT_INFO_VERSION: u8 = 1;
-const ENDPOINT_INFO_VISIBLE: u8 = 1;
+const ENDPOINT_INFO_VERSION: u8 = 0;
+const ENDPOINT_INFO_VISIBLE: u8 = 0;
 
 #[derive(Debug, Clone, Deserialize, PartialEq, Serialize, TS)]
 #[ts(export)]
@@ -354,11 +354,11 @@ mod tests {
     }
 
     #[test]
-    fn test_mdns_info_header_matches_android_shape() {
+    fn test_mdns_info_header_matches_visible_receiver_shape() {
         let info = gen_mdns_endpoint_info(DeviceType::Laptop as u8, "raspberrypi-5");
         let decoded = URL_SAFE_NO_PAD.decode(info).unwrap();
 
-        assert_eq!(decoded[0], 0x36);
+        assert_eq!(decoded[0], 0x06);
     }
 
     #[test]
