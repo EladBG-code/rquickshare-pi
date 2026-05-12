@@ -9,6 +9,8 @@ use tokio_util::sync::CancellationToken;
 use uuid::{uuid, Uuid};
 
 const SERVICE_UUID_SHARING: Uuid = uuid!("0000fe2c-0000-1000-8000-00805f9b34fb");
+const SAMSUNG_COMPANY_ID: u16 = 117;
+const RESEND_THROTTLE: Duration = Duration::from_secs(5);
 
 const INNER_NAME: &str = "BleListener";
 
@@ -35,12 +37,9 @@ impl BleListener {
         info!("{INNER_NAME}: service starting");
 
         let mut events = self.adapter.events().await?;
-        // Filter on the NearyShare/QuickShare services UUID
-        self.adapter
-            .start_scan(ScanFilter {
-                services: vec![SERVICE_UUID_SHARING],
-            })
-            .await?;
+        // Samsung Quick Share on current phones can expose only manufacturer data
+        // while the send sheet is searching, so scan broadly and filter events here.
+        self.adapter.start_scan(ScanFilter::default()).await?;
 
         let mut last_alert = SystemTime::UNIX_EPOCH;
 
@@ -61,12 +60,25 @@ impl BleListener {
                             }
 
                             let now = SystemTime::now();
-                            // Don't spam, max once per 30s
-                            if now.duration_since(last_alert)? <= Duration::from_secs(30) {
+                            if now.duration_since(last_alert)? <= RESEND_THROTTLE {
                                 continue;
                             }
 
                             debug!("{INNER_NAME}: A device ({id}) is sharing ({service_data:?}) nearby");
+                            self.sender.send(())?;
+                            last_alert = now;
+                        },
+                        CentralEvent::ManufacturerDataAdvertisement { id, manufacturer_data } => {
+                            if !is_samsung_quick_share_hint(&manufacturer_data) {
+                                continue;
+                            }
+
+                            let now = SystemTime::now();
+                            if now.duration_since(last_alert)? <= RESEND_THROTTLE {
+                                continue;
+                            }
+
+                            debug!("{INNER_NAME}: Samsung Quick Share search hint from {id} ({manufacturer_data:?})");
                             self.sender.send(())?;
                             last_alert = now;
                         },
@@ -80,5 +92,34 @@ impl BleListener {
         }
 
         Ok(())
+    }
+}
+
+fn is_samsung_quick_share_hint(
+    manufacturer_data: &std::collections::HashMap<u16, Vec<u8>>,
+) -> bool {
+    manufacturer_data.contains_key(&SAMSUNG_COMPANY_ID)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use super::{is_samsung_quick_share_hint, SAMSUNG_COMPANY_ID};
+
+    #[test]
+    fn detects_samsung_manufacturer_data_as_search_hint() {
+        let mut data = HashMap::new();
+        data.insert(SAMSUNG_COMPANY_ID, vec![0x02, 0x18, 0x61]);
+
+        assert!(is_samsung_quick_share_hint(&data));
+    }
+
+    #[test]
+    fn ignores_other_manufacturer_data() {
+        let mut data = HashMap::new();
+        data.insert(0x004c, vec![0x02, 0x15]);
+
+        assert!(!is_samsung_quick_share_hint(&data));
     }
 }
