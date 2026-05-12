@@ -242,18 +242,7 @@ impl MDnsServer {
             info!("{INNER_NAME}: advertising IPv4 address(es): {ip_csv}");
         }
 
-        let mut properties = vec![
-            ("n", endpoint_info),
-            // Android Quick Share publishes this flag in its own mDNS records.
-            // Mirroring it keeps the Pi's receiver advertisement closer to the
-            // native Android shape that sender devices already understand.
-            ("f", "5745".to_string()),
-        ];
-
-        if let Some(ip) = addresses.first() {
-            properties.push(("IPv4", ip.to_string()));
-        }
-
+        let properties = [("n", endpoint_info)];
         let mut si = ServiceInfo::new(
             "_FC9F5ED42C8A._tcp.local.",
             &name,
