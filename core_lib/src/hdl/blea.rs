@@ -12,8 +12,9 @@ use crate::utils::default_device_name;
 use crate::Visibility;
 
 const SERVICE_DATA: Bytes = Bytes::from_static(&[
-    // Nearby Share fast-initiation model id fc128e + V1 notify metadata.
-    0xfc, 0x12, 0x8e, 0x00, 0x42,
+    // Nearby Share fast-initiation model id fc128e + Android receiver metadata.
+    0xfc, 0x12, 0x8e, 0x01, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xbf, 0x2d,
+    0x5b, 0xa0, 0xe1, 0xd8, 0x75, 0x24, 0xca, 0x00,
 ]);
 
 const INNER_NAME: &str = "BleAdvertiser";
@@ -154,7 +155,6 @@ impl BleAdvertiser {
         let is_peripheral = advertisement_type == Type::Peripheral;
         Advertisement {
             advertisement_type,
-            service_uuids: std::iter::once(service_uuid).collect(),
             service_data: [(service_uuid, adv_data.into())].into(),
             discoverable: is_peripheral.then_some(true),
             discoverable_timeout: is_peripheral.then_some(Duration::from_secs(0)),
@@ -200,6 +200,10 @@ mod tests {
 
     #[test]
     fn fast_initiation_payload_matches_nearby_share_shape() {
-        assert_eq!(SERVICE_DATA.as_ref(), &[0xfc, 0x12, 0x8e, 0x00, 0x42]);
+        assert_eq!(SERVICE_DATA.len(), 24);
+        assert_eq!(
+            &SERVICE_DATA[..14],
+            &[0xfc, 0x12, 0x8e, 0x01, 0x42, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        );
     }
 }
