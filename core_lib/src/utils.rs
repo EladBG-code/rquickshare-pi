@@ -185,9 +185,9 @@ pub fn local_mdns_ipv4_addrs() -> Vec<Ipv4Addr> {
 }
 
 fn interface_priority(name: &str) -> u8 {
-    if name.starts_with("eth") || name.starts_with("en") {
+    if name.starts_with("wlan") || name.starts_with("wl") {
         0
-    } else if name.starts_with("wlan") || name.starts_with("wl") {
+    } else if name.starts_with("eth") || name.starts_with("en") {
         1
     } else {
         2
@@ -362,8 +362,8 @@ mod tests {
     }
 
     #[test]
-    fn test_interface_priority_prefers_wired_before_wifi() {
-        assert!(interface_priority("eth0") < interface_priority("wlan0"));
-        assert!(interface_priority("enp1s0") < interface_priority("wlx001122334455"));
+    fn test_interface_priority_prefers_wifi_before_wired() {
+        assert!(interface_priority("wlan0") < interface_priority("eth0"));
+        assert!(interface_priority("wlx001122334455") < interface_priority("enp1s0"));
     }
 }
