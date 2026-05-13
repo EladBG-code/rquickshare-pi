@@ -11,7 +11,7 @@ use ts_rs::TS;
 
 use crate::utils::{
     gen_mdns_endpoint_info, gen_mdns_name, ignored_mdns_interface_names, local_mdns_ipv4_addrs,
-    mdns_host_name, DeviceType,
+    DeviceType,
 };
 
 const INNER_NAME: &str = "MDnsServer";
@@ -226,9 +226,9 @@ impl MDnsServer {
         device_name: &str,
     ) -> Result<ServiceInfo, anyhow::Error> {
         let name = gen_mdns_name(endpoint_id);
-        info!("Broadcasting with: {device_name}");
+        let hostname = format!("{}.local.", name.to_ascii_lowercase());
+        info!("Broadcasting with: device_name={device_name}, host_name={hostname}");
         let endpoint_info = gen_mdns_endpoint_info(device_type as u8, device_name);
-        let hostname = mdns_host_name();
         let addresses = local_mdns_ipv4_addrs();
         let ip_csv = addresses
             .iter()

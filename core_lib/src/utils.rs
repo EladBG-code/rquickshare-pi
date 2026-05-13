@@ -74,27 +74,6 @@ pub fn default_device_name() -> String {
     sys_metrics::host::get_hostname().unwrap_or_else(|_| String::from("RQuickShare Pi"))
 }
 
-pub fn mdns_host_name() -> String {
-    let mut label = default_device_name()
-        .to_ascii_lowercase()
-        .chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
-        .collect::<String>();
-
-    while label.contains("--") {
-        label = label.replace("--", "-");
-    }
-
-    let label = label.trim_matches('-');
-    let label = if label.is_empty() {
-        "rquickshare-pi"
-    } else {
-        label
-    };
-
-    format!("{}.local.", truncate_utf8_bytes(label, 63))
-}
-
 pub fn normalize_device_name(device_name: &str) -> String {
     let trimmed = device_name.trim();
     let normalized = if trimmed.is_empty() {

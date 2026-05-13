@@ -4,6 +4,8 @@ use rqs_lib::Visibility;
 use tauri::{AppHandle, Emitter, Wry};
 use tauri_plugin_store::{Store, StoreExt};
 
+const DEFAULT_PORT: u32 = 9300;
+
 fn _get_store(app_handle: &AppHandle) -> Arc<Store<Wry>> {
     app_handle
         .store_builder(".settings.json")
@@ -29,6 +31,10 @@ pub fn init_default(app_handle: &AppHandle) {
 
     if !store.has("startminimized") {
         store.set("startminimized", false);
+    }
+
+    if !store.has("port") {
+        store.set("port", DEFAULT_PORT);
     }
 }
 
