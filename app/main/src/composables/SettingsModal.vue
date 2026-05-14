@@ -34,6 +34,10 @@ function openUpstream() {
 function openLicense() {
 	void open('https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE');
 }
+
+function openIcons8() {
+	void open('https://icons8.com');
+}
 </script>
 
 <template>
@@ -93,6 +97,15 @@ function openLicense() {
 							class="text-blue-600 hover:underline"
 							@click="openLicense">
 							GPL-3.0 license
+						</button>.
+					</p>
+					<p class="mt-2">
+						Ko-fi icon by
+						<button
+							type="button"
+							class="text-blue-600 hover:underline"
+							@click="openIcons8">
+							Icons8
 						</button>.
 					</p>
 				</div>
