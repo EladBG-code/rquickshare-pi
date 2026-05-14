@@ -251,6 +251,32 @@ PI_BUILD_NOTES.md
 
 ## 🧯 Troubleshooting
 
+### Samsung phone cannot see the Pi
+
+If a Samsung phone opens Quick Share and immediately drops/disconnects Wi-Fi,
+turn off Samsung's Apple-device compatibility mode:
+
+```text
+Settings > Connected devices > Quick Share > Share with Apple devices > Off
+```
+
+Why this matters:
+
+- Android Quick Share discovers nearby devices with Bluetooth, then transfers
+  over a direct local Wi-Fi connection.
+- This fork currently supports the Wi-Fi LAN / mDNS Quick Share path.
+- Samsung's Apple compatibility mode can push the phone into a different
+  sharing path, which prevents the phone from seeing this Pi receiver.
+
+After disabling that option, keep Bluetooth and Wi-Fi enabled, keep the phone
+and Pi nearby, then reopen the Android share sheet and choose Quick Share.
+
+References:
+
+- [Android Quick Share FAQ](https://www.android.com/quick-share/with-android/)
+- [Samsung Quick Share Wi-Fi note](https://www.samsung.com/levant/support/mobile-devices/quick-share-cannot-be-used-when-wi-fi-is-off-and-wi-fi-turns-on-when-setting-who-can-share-with-you-option/)
+- [Packet Linux Quick Share requirements](https://github.com/nozwock/packet#requirements)
+
 Blank WebKit window:
 
 ```bash
