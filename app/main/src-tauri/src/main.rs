@@ -37,6 +37,8 @@ mod logger;
 mod notification;
 mod store;
 
+const AUTOSTART_ARG: &str = "--rquickshare-pi-autostart";
+
 pub struct AppState {
     pub message_sender: broadcast::Sender<ChannelMessage>,
     pub dch_sender: broadcast::Sender<EndpointInfo>,
@@ -156,12 +158,16 @@ async fn main() -> Result<(), anyhow::Error> {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
-            None,
+            Some(vec![AUTOSTART_ARG]),
         ))
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             trace!("tauri_plugin_single_instance: instance already running");
-            open_main_window(app);
+            if is_autostart_launch(argv) {
+                trace!("tauri_plugin_single_instance: keeping existing instance in tray");
+            } else {
+                open_main_window(app);
+            }
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
@@ -238,15 +244,10 @@ async fn main() -> Result<(), anyhow::Error> {
         .run(|app_handle, event| match event {
             tauri::RunEvent::Ready { .. } => {
                 trace!("RunEvent::Ready");
-                if get_startminimized(app_handle) {
-                    #[cfg(not(target_os = "macos"))]
-                    app_handle
-                        .get_webview_window("main")
-                        .unwrap()
-                        .hide()
-                        .unwrap();
-                    #[cfg(target_os = "macos")]
-                    app_handle.hide().unwrap();
+                if should_start_hidden(app_handle) {
+                    hide_main_window(app_handle);
+                } else {
+                    open_main_window(app_handle);
                 }
             }
             tauri::RunEvent::ExitRequested { code, .. } => {
@@ -265,6 +266,14 @@ async fn main() -> Result<(), anyhow::Error> {
 
     info!("Application stopped");
     Ok(())
+}
+
+fn is_autostart_launch(args: impl IntoIterator<Item = String>) -> bool {
+    args.into_iter().any(|arg| arg == AUTOSTART_ARG)
+}
+
+fn should_start_hidden(app_handle: &AppHandle) -> bool {
+    is_autostart_launch(std::env::args()) || get_startminimized(app_handle)
 }
 
 fn spawn_receiver_tasks(app_handle: &AppHandle) {
@@ -399,6 +408,20 @@ fn open_main_window(app_handle: &AppHandle) {
     }
 
     warn!("open_main_window: no main window found");
+}
+
+fn hide_main_window(app_handle: &AppHandle) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = app_handle.hide();
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    if let Some(webview_window) = app_handle.get_webview_window("main") {
+        let _ = webview_window.hide();
+    } else {
+        warn!("hide_main_window: no main window found");
+    }
 }
 
 fn kill_app(app_handle: &AppHandle) {
