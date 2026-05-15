@@ -501,6 +501,59 @@ h3 {
 	font-weight: 800;
 }
 
+.credit-disclosure,
+.footer-credits {
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.78);
+}
+
+.credit-disclosure summary,
+.footer-credits summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.95rem 1rem;
+	color: var(--raspberry-dark);
+	font-weight: 850;
+	cursor: pointer;
+	list-style: none;
+}
+
+.credit-disclosure summary::-webkit-details-marker,
+.footer-credits summary::-webkit-details-marker {
+	display: none;
+}
+
+.credit-disclosure summary::after,
+.footer-credits summary::after {
+	content: "›";
+	font-size: 1.45rem;
+	line-height: 1;
+	transition: transform 160ms ease;
+}
+
+.credit-disclosure[open] summary::after,
+.footer-credits[open] summary::after {
+	transform: rotate(90deg);
+}
+
+.credit-disclosure div,
+.footer-credits p {
+	padding: 0 1rem 1rem;
+}
+
+.footer-credits {
+	max-width: 46rem;
+}
+
+.footer-credits p {
+	margin: 0;
+	color: var(--muted);
+	line-height: 1.65;
+}
+
 @keyframes rise {
 	from {
 		opacity: 0;

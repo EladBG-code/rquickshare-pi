@@ -2,7 +2,6 @@
 import { TauriVM } from '../vue_lib/helper/ParamsHelper';
 import { PropType } from 'vue';
 import { open } from '@tauri-apps/plugin-shell';
-import kofiIcon from '../vue_lib/assets/icons8-ko-fi-96.png';
 
 const props = defineProps({
 	vm: {
@@ -62,11 +61,11 @@ function openKofi() {
 				<span>© EladBG, Pi fork</span>
 				<button
 					type="button"
-					class="btn h-9 w-9 !p-1.5 rounded-xl active:scale-95 transition duration-150 ease-in-out"
+					class="btn h-9 min-w-12 !px-2 rounded-xl active:scale-95 transition duration-150 ease-in-out text-[0.7rem] font-semibold"
 					aria-label="Donate on Ko-fi"
 					title="Donate on Ko-fi"
 					@click="openKofi">
-					<img :src="kofiIcon" alt="" class="h-full w-full object-contain" draggable="false">
+					Ko-fi
 				</button>
 			</div>
 		</div>
