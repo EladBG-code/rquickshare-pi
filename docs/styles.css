@@ -22,6 +22,7 @@
 
 body {
 	margin: 0;
+	overflow-x: hidden;
 	background:
 		radial-gradient(circle at top left, rgba(209, 46, 93, 0.18), transparent 32rem),
 		linear-gradient(180deg, #fff8fa 0%, #fff 42%, #fff7f9 100%);
@@ -35,6 +36,7 @@ a {
 
 pre {
 	margin: 1rem 0 0;
+	max-width: 100%;
 	overflow-x: auto;
 	border: 1px solid var(--line);
 	border-radius: 18px;
@@ -46,6 +48,12 @@ pre {
 
 code {
 	font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+pre code {
+	white-space: inherit;
+	overflow-wrap: inherit;
+	word-break: inherit;
 }
 
 .site-header {
@@ -102,7 +110,22 @@ code {
 	grid-template-columns: minmax(0, 1.02fr) minmax(22rem, 0.98fr);
 	gap: clamp(2rem, 6vw, 5rem);
 	align-items: center;
+	max-width: 100%;
+	min-width: 0;
 	min-height: calc(100vh - 4.5rem);
+}
+
+.hero-copy,
+.section-heading,
+.lead,
+.hero-actions,
+.hero-badges,
+.hero-device,
+.device-body,
+.device-sidebar,
+.device-content {
+	max-width: 100%;
+	min-width: 0;
 }
 
 .eyebrow {
@@ -122,11 +145,12 @@ p {
 }
 
 h1 {
-	max-width: 10ch;
+	max-width: min(10ch, 100%);
 	margin-bottom: 1.2rem;
 	font-size: clamp(4rem, 9vw, 7.4rem);
 	line-height: 0.88;
 	letter-spacing: 0;
+	overflow-wrap: break-word;
 }
 
 h2 {
@@ -146,6 +170,7 @@ h3 {
 	color: var(--muted);
 	font-size: clamp(1.05rem, 1.7vw, 1.28rem);
 	line-height: 1.7;
+	overflow-wrap: anywhere;
 }
 
 .hero-actions {
@@ -189,12 +214,15 @@ h3 {
 }
 
 .hero-badges span {
+	max-width: 100%;
+	min-width: 0;
 	padding: 0.5rem 0.7rem;
 	border: 1px solid var(--line);
 	border-radius: 999px;
 	background: rgba(255, 255, 255, 0.64);
 	color: var(--muted);
 	font-size: 0.88rem;
+	overflow-wrap: anywhere;
 }
 
 .hero-device {
@@ -342,6 +370,7 @@ h3 {
 	color: var(--muted);
 	font-size: 1.05rem;
 	line-height: 1.7;
+	overflow-wrap: anywhere;
 }
 
 .install-grid,
@@ -349,6 +378,7 @@ h3 {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 1rem;
+	min-width: 0;
 }
 
 .feature-grid {
@@ -366,6 +396,7 @@ h3 {
 
 .install-grid article,
 .feature-grid article {
+	min-width: 0;
 	padding: 1.35rem;
 }
 
@@ -378,6 +409,7 @@ h3 {
 .feature-grid p {
 	color: var(--muted);
 	line-height: 1.65;
+	overflow-wrap: anywhere;
 }
 
 .step {
@@ -468,11 +500,13 @@ h3 {
 }
 
 .wiki-pages {
+	min-width: 0;
 	padding: clamp(1.25rem, 4vw, 2.4rem);
 }
 
 .wiki-page {
 	display: none;
+	min-width: 0;
 	max-width: 55rem;
 	animation: rise 200ms ease both;
 }
@@ -489,6 +523,7 @@ h3 {
 .wiki-page li {
 	color: var(--muted);
 	line-height: 1.75;
+	overflow-wrap: anywhere;
 }
 
 .wiki-page ol {
@@ -638,12 +673,29 @@ h3 {
 	}
 
 	h1 {
-		font-size: clamp(3rem, 18vw, 4.5rem);
+		font-size: clamp(2.85rem, 15vw, 3.85rem);
+		line-height: 0.95;
 	}
 
 	.install-grid,
 	.feature-grid {
 		grid-template-columns: 1fr;
+	}
+
+	.install-grid article,
+	.feature-grid article,
+	.wiki-layout {
+		width: 100%;
+		max-width: 100%;
+	}
+
+	pre {
+		overflow-x: hidden;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		word-break: break-word;
+		font-size: 0.82rem;
+		line-height: 1.55;
 	}
 
 	.device-sidebar {

@@ -105,7 +105,7 @@ function openLicense() {
 					aria-label="Donate on Ko-fi"
 					title="Donate on Ko-fi"
 					@click="openKofi">
-					<img :src="kofiLogo" alt="" class="h-7 w-9 object-contain">
+					<img :src="kofiLogo" alt="" class="h-5 w-7 object-contain">
 				</button>
 			</div>
 		</div>
