@@ -16,6 +16,8 @@ use rqs_lib::channel::{ChannelDirection, ChannelMessage};
 use rqs_lib::{EndpointInfo, SendInfo, State, Visibility, RQS};
 use store::get_startminimized;
 use tauri::image::Image;
+#[cfg(target_os = "linux")]
+use tauri::PhysicalSize;
 #[cfg(not(target_os = "linux"))]
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
@@ -404,10 +406,43 @@ fn open_main_window(app_handle: &AppHandle) {
     if let Some(webview_window) = app_handle.get_webview_window("main") {
         let _ = webview_window.show();
         let _ = webview_window.set_focus();
+        #[cfg(target_os = "linux")]
+        nudge_webview_repaint(webview_window);
         return;
     }
 
     warn!("open_main_window: no main window found");
+}
+
+#[cfg(target_os = "linux")]
+fn nudge_webview_repaint(webview_window: tauri::WebviewWindow) {
+    tauri::async_runtime::spawn(async move {
+        for delay in [
+            std::time::Duration::from_millis(80),
+            std::time::Duration::from_millis(260),
+        ] {
+            tokio::time::sleep(delay).await;
+
+            let Ok(size) = webview_window.inner_size() else {
+                trace!("nudge_webview_repaint: skipped, no window size");
+                continue;
+            };
+
+            let nudge_width = size.width.saturating_add(1);
+            trace!(
+                "nudge_webview_repaint: resizing {}x{} -> {}x{} -> {}x{}",
+                size.width,
+                size.height,
+                nudge_width,
+                size.height,
+                size.width,
+                size.height
+            );
+            let _ = webview_window.set_size(PhysicalSize::new(nudge_width, size.height));
+            let _ = webview_window.set_size(PhysicalSize::new(size.width, size.height));
+            let _ = webview_window.set_focus();
+        }
+    });
 }
 
 fn hide_main_window(app_handle: &AppHandle) {
