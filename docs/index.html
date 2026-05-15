@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="RQuickShare Pi is a Raspberry Pi OS ARM64 focused Quick Share app, built and tested on real Pi hardware.">
+	<title>RQuickShare Pi</title>
+	<link rel="icon" href="assets/rquickshare-pi.svg" type="image/svg+xml">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<header class="site-header">
+		<a class="brand" href="#top" aria-label="RQuickShare Pi home">
+			<img src="assets/rquickshare-pi.svg" alt="" class="brand-mark">
+			<span>RQuickShare Pi</span>
+		</a>
+		<nav class="top-nav" aria-label="Primary navigation">
+			<a href="#download">Download</a>
+			<a href="#pi-stack">Pi Stack</a>
+			<a href="#wiki">Wiki</a>
+			<a href="https://github.com/EladBG-code/rquickshare-pi">GitHub</a>
+		</nav>
+	</header>
+
+	<main id="top">
+		<section class="hero section-pad">
+			<div class="hero-copy">
+				<p class="eyebrow">Raspberry Pi OS ARM64 Quick Share</p>
+				<h1>Quick Share, tuned for the Pi.</h1>
+				<p class="lead">
+					RQuickShare Pi is a Raspberry Pi focused fork of RQuickShare for nearby file sharing with Android Quick Share devices.
+					It is built around real Pi hardware, Bluetooth discovery, mDNS, WebKitGTK, and the tray-first desktop workflow Raspberry Pi OS users expect.
+				</p>
+				<div class="hero-actions">
+					<a class="button primary" href="https://github.com/EladBG-code/rquickshare-pi/releases">Download Alpha</a>
+					<a class="button secondary" href="#wiki">Open Wiki</a>
+				</div>
+				<div class="hero-badges" aria-label="Project target badges">
+					<span>Raspberry Pi 5</span>
+					<span>Raspberry Pi OS 64-bit</span>
+					<span>ARM64</span>
+					<span>Bluetooth + mDNS</span>
+				</div>
+			</div>
+			<div class="hero-device" aria-label="RQuickShare Pi status preview">
+				<div class="device-topbar">
+					<span class="dot red"></span>
+					<span class="dot green"></span>
+					<span class="dot dark"></span>
+					<span class="window-title">RQuickShare Pi</span>
+				</div>
+				<div class="device-body">
+					<div class="device-sidebar">
+						<span class="small-label">Device name</span>
+						<strong>raspberrypi</strong>
+						<span class="small-label spacing">Visibility state</span>
+						<strong>Always visible</strong>
+						<p>Nearby devices can share files with you after your approval.</p>
+					</div>
+					<div class="device-content">
+						<h2>Ready to receive</h2>
+						<div class="pulse-orbit">
+							<span></span>
+						</div>
+						<div class="drop-zone">
+							<span class="upload-glyph">↑</span>
+							<p>Drop files to send</p>
+							<button type="button">Select</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="download" class="download section-pad">
+			<div class="section-heading">
+				<p class="eyebrow">Install</p>
+				<h2>One Pi package, no platform confusion.</h2>
+				<p>Unlike general desktop builds, this fork targets Raspberry Pi OS 64-bit on ARM64 first.</p>
+			</div>
+			<div class="install-grid">
+				<article>
+					<span class="step">1</span>
+					<h3>Download the alpha</h3>
+					<p>Grab the ARM64 Debian package from GitHub Releases.</p>
+					<a href="https://github.com/EladBG-code/rquickshare-pi/releases">Open releases</a>
+				</article>
+				<article>
+					<span class="step">2</span>
+					<h3>Install on the Pi</h3>
+					<pre><code>sudo apt install ./RQuickShare.Pi_0.0.1-alpha_arm64.deb</code></pre>
+				</article>
+				<article>
+					<span class="step">3</span>
+					<h3>Launch from Accessories</h3>
+					<p>The app runs from the system tray and can start hidden at boot.</p>
+				</article>
+			</div>
+		</section>
+
+		<section id="pi-stack" class="stack section-pad">
+			<div class="section-heading">
+				<p class="eyebrow">Pi Stack</p>
+				<h2>Built around the parts that matter on Raspberry Pi OS.</h2>
+			</div>
+			<div class="feature-grid">
+				<article>
+					<h3>Bluetooth Discovery</h3>
+					<p>Advertises the receiver path expected by Android Quick Share while keeping the Pi desktop workflow stable.</p>
+				</article>
+				<article>
+					<h3>mDNS Networking</h3>
+					<p>Uses local network discovery for the actual transfer path once devices find each other.</p>
+				</article>
+				<article>
+					<h3>Tray First</h3>
+					<p>Autostart can keep the app quietly in the tray until the user explicitly opens the window.</p>
+				</article>
+				<article>
+					<h3>Real Pi Target</h3>
+					<p>Build and runtime claims are checked on Raspberry Pi hardware, not only on generic x86 CI.</p>
+				</article>
+			</div>
+		</section>
+
+		<section id="wiki" class="wiki-shell section-pad">
+			<div class="wiki-heading">
+				<div>
+					<p class="eyebrow">Wiki</p>
+					<h2>RQuickShare Pi Wiki</h2>
+					<p>Pi-focused setup, behavior, and troubleshooting notes in one clean place.</p>
+				</div>
+				<label class="wiki-search">
+					<span>Search wiki</span>
+					<input id="wikiSearch" type="search" placeholder="Try Bluetooth, Samsung, autostart...">
+				</label>
+			</div>
+			<div class="wiki-layout">
+				<aside class="wiki-nav" aria-label="Wiki topics">
+					<button class="wiki-tab active" data-topic="quick-start">Quick Start</button>
+					<button class="wiki-tab" data-topic="install">Install</button>
+					<button class="wiki-tab" data-topic="boot-tray">Boot & Tray</button>
+					<button class="wiki-tab" data-topic="android-receive">Receive From Android</button>
+					<button class="wiki-tab" data-topic="samsung">Samsung Caveat</button>
+					<button class="wiki-tab" data-topic="build">Build From Source</button>
+					<button class="wiki-tab" data-topic="troubleshooting">Troubleshooting</button>
+					<button class="wiki-tab" data-topic="credits">Credits & License</button>
+				</aside>
+				<div class="wiki-pages">
+					<article class="wiki-page active" data-topic="quick-start" data-keywords="quick start first launch visible receive send">
+						<h3>Quick Start</h3>
+						<ol>
+							<li>Install the ARM64 Debian package on Raspberry Pi OS 64-bit.</li>
+							<li>Open RQuickShare Pi from Accessories, or use the tray icon if it is already running.</li>
+							<li>Keep visibility set to Always visible when you want nearby Android devices to find the Pi.</li>
+							<li>Approve incoming transfers in the app before files are saved.</li>
+						</ol>
+					</article>
+					<article class="wiki-page" data-topic="install" data-keywords="install deb package apt accessories menu">
+						<h3>Install</h3>
+						<p>Download the `.deb` from the Releases page and install it locally:</p>
+						<pre><code>sudo apt install ./RQuickShare.Pi_0.0.1-alpha_arm64.deb</code></pre>
+						<p>After install, the launcher should appear under Accessories on Raspberry Pi OS.</p>
+					</article>
+					<article class="wiki-page" data-topic="boot-tray" data-keywords="boot startup autostart tray hidden minimized show window">
+						<h3>Boot & Tray Behavior</h3>
+						<p>When autostart is enabled, RQuickShare Pi starts hidden in the tray after login. The main window should only appear when the user selects Show from the tray menu.</p>
+						<p>The app keeps running on close by default so Bluetooth and mDNS discovery stay available.</p>
+					</article>
+					<article class="wiki-page" data-topic="android-receive" data-keywords="android receive quick share phone discover visible bluetooth mdns wifi">
+						<h3>Receive From Android</h3>
+						<p>Set the Pi to Always visible, keep Bluetooth enabled, and make sure the phone is near the Pi. Android Quick Share uses Bluetooth for discovery and a local network path for transfer.</p>
+						<p>If the phone cannot see the Pi, wait a few seconds after opening Quick Share, then toggle visibility off and back on in the app.</p>
+					</article>
+					<article class="wiki-page" data-topic="samsung" data-keywords="samsung galaxy apple devices s26 quick share phone not finding pi">
+						<h3>Samsung Quick Share Caveat</h3>
+						<p>On Samsung phones, the Share with Apple devices mode can stop Android-to-Pi discovery from appearing.</p>
+						<p>Use this path on the phone:</p>
+						<pre><code>Settings > Connected devices > Quick Share > Share with Apple devices > Off</code></pre>
+						<p>After turning that off, retry sending from the phone to the Pi.</p>
+					</article>
+					<article class="wiki-page" data-topic="build" data-keywords="build source rust node pnpm tauri raspberry pi">
+						<h3>Build From Source</h3>
+						<p>Clone the repository on a Raspberry Pi OS ARM64 machine, install the native dependencies, then build the core library and Tauri app.</p>
+						<pre><code>cd core_lib
+cargo test
+cargo build
+
+cd ../app/main
+pnpm install --frozen-lockfile
+pnpm check
+pnpm build:debug</code></pre>
+					</article>
+					<article class="wiki-page" data-topic="troubleshooting" data-keywords="troubleshooting logs bluetooth avahi systemctl rfkill report issue">
+						<h3>Troubleshooting</h3>
+						<p>Useful checks when discovery or receiving fails:</p>
+						<pre><code>bluetoothctl show
+rfkill list bluetooth
+systemctl status bluetooth --no-pager
+systemctl status avahi-daemon --no-pager
+ip addr</code></pre>
+						<p>If the app creates an error report, attach it to a GitHub issue with what you were trying to send.</p>
+					</article>
+					<article class="wiki-page" data-topic="credits" data-keywords="credits license upstream rquickshare gpl icons8">
+						<h3>Credits & License</h3>
+						<p>RQuickShare Pi is based on RQuickShare by Martin ANDRE and keeps the upstream GPL-3.0 license, credits, and project history.</p>
+						<p>RQuickShare Pi changes are maintained by EladBG. The Ko-fi icon is credited to Icons8.</p>
+					</article>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="site-footer">
+		<div>
+			<img src="assets/rquickshare-pi.svg" alt="" class="footer-mark">
+			<span>RQuickShare Pi</span>
+		</div>
+		<p>Raspberry Pi focused fork of <a href="https://github.com/Martichou/rquickshare">RQuickShare</a>. Licensed under GPL-3.0.</p>
+	</footer>
+
+	<script src="app.js"></script>
+</body>
+</html>
