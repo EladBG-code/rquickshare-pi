@@ -175,6 +175,7 @@
 					<button class="wiki-tab" data-topic="samsung">Samsung Caveat</button>
 					<button class="wiki-tab" data-topic="build">Build From Source</button>
 					<button class="wiki-tab" data-topic="troubleshooting">Troubleshooting</button>
+					<button class="wiki-tab" data-topic="uninstall">Uninstall</button>
 					<button class="wiki-tab" data-topic="credits">Credits & License</button>
 				</aside>
 				<div class="wiki-pages">
@@ -231,6 +232,19 @@ systemctl status bluetooth --no-pager
 systemctl status avahi-daemon --no-pager
 ip addr</code></pre>
 						<p>If the app creates an error report, attach it to a GitHub issue with what you were trying to send.</p>
+					</article>
+					<article class="wiki-page" data-topic="uninstall" data-keywords="uninstall remove clean apt package autostart data config">
+						<h3>Uninstall</h3>
+						<p>Use the hosted uninstall script to remove the RQuickShare Pi package and clean up the launcher/autostart pieces it owns.</p>
+						<pre><code>curl -fsSL https://eladbg-code.github.io/rquickshare-pi/uninstall.sh | bash</code></pre>
+						<div class="wiki-note">
+							<strong>What it removes</strong>
+							<p>The script stops any running app process, removes the Debian package with apt, and clears stale autostart launchers for the current user.</p>
+						</div>
+						<div class="wiki-note soft">
+							<strong>What it keeps</strong>
+							<p>Your Downloads folder and received files are left alone. App settings and diagnostic reports are kept unless you deliberately run the script with <code>--purge-user-data</code>.</p>
+						</div>
 					</article>
 					<article class="wiki-page" data-topic="credits" data-keywords="credits license upstream rquickshare gpl copyright warranty">
 						<h3>Credits & License</h3>
