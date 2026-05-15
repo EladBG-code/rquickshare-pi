@@ -16,10 +16,10 @@
     ],
     "resources": [],
     "externalBin": [],
-    "copyright": "",
+    "copyright": "© EladBG for RQuickShare Pi changes. Original RQuickShare copyrights remain with their authors.",
     "category": "Utility",
-    "shortDescription": "",
-    "longDescription": "",
+    "shortDescription": "Quick Share for Raspberry Pi OS ARM64",
+    "longDescription": "Independent Raspberry Pi focused fork of RQuickShare for nearby file sharing with Android Quick Share devices.",
     "macOS": {
       "frameworks": [],
       "exceptionDomain": "",
