@@ -34,10 +34,6 @@ function openUpstream() {
 function openLicense() {
 	void open('https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE');
 }
-
-function openIcons8() {
-	void open('https://icons8.com');
-}
 </script>
 
 <template>
@@ -78,37 +74,41 @@ function openIcons8() {
 						</span>
 					</label>
 				</div>
-				<div class="border-t border-gray-200 mt-3 pt-3 px-3 text-xs leading-relaxed text-gray-600">
-					<p>
-						Based on
-						<button
-							type="button"
-							class="text-blue-600 hover:underline"
-							@click="openUpstream">
-							RQuickShare
-						</button>
-						by Martin ANDRE. This fork keeps the upstream GPL-3.0 license, credits, and project history.
-					</p>
-					<p class="mt-2">
-						© EladBG for RQuickShare Pi changes. Original RQuickShare copyrights remain with their authors and contributors.
-						This software is provided without warranty under the
-						<button
-							type="button"
-							class="text-blue-600 hover:underline"
-							@click="openLicense">
-							GPL-3.0 license
-						</button>.
-					</p>
-					<p class="mt-2">
-						Ko-fi icon by
-						<button
-							type="button"
-							class="text-blue-600 hover:underline"
-							@click="openIcons8">
-							Icons8
-						</button>.
-					</p>
-				</div>
+				<details class="border-t border-gray-200 mt-3 pt-3 px-3 text-xs leading-relaxed text-gray-600 group">
+					<summary class="btn rounded-xl !justify-between px-3 py-2 cursor-pointer list-none">
+						<span>Credits & license</span>
+						<svg
+							xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"
+							class="transition-transform duration-150 group-open:rotate-90">
+							<path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+						</svg>
+					</summary>
+					<div class="pt-3">
+						<p>
+							Based on
+							<button
+								type="button"
+								class="text-blue-600 hover:underline"
+								@click="openUpstream">
+								RQuickShare
+							</button>
+							by Martin ANDRE and contributors.
+						</p>
+						<p class="mt-2">
+							This fork preserves the upstream GPL-3.0 license, copyright notices, credits, and project history.
+							Original RQuickShare copyrights remain with their respective authors.
+						</p>
+						<p class="mt-2">
+							© EladBG for RQuickShare Pi changes. This software is provided without warranty under the
+							<button
+								type="button"
+								class="text-blue-600 hover:underline"
+								@click="openLicense">
+								GPL-3.0 license
+							</button>.
+						</p>
+					</div>
+				</details>
 			</div>
 		</div>
 	</div>
