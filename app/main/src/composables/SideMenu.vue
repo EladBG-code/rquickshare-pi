@@ -17,6 +17,14 @@ const pluralize = (n: number, s: string) => n === 1 ? s : `${s}s`;
 function openKofi() {
 	void open('https://ko-fi.com/eladbg');
 }
+
+function openUpstream() {
+	void open('https://github.com/Martichou/rquickshare');
+}
+
+function openLicense() {
+	void open('https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE');
+}
 </script>
 
 <template>
@@ -58,7 +66,38 @@ function openKofi() {
 		</div>
 		<div class="mt-auto px-3 pb-3">
 			<div class="flex items-center justify-between border-t border-rose-100 pt-3 text-xs text-gray-600">
-				<span>© EladBG, Pi fork</span>
+				<details class="relative group">
+					<summary class="btn h-9 !px-2 rounded-xl active:scale-95 transition duration-150 ease-in-out cursor-pointer list-none">
+						<span>Credits</span>
+						<svg
+							xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16"
+							class="transition-transform duration-150 group-open:rotate-90">
+							<path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+						</svg>
+					</summary>
+					<div class="absolute bottom-11 left-0 z-20 w-60 rounded-xl border border-rose-100 bg-white p-3 shadow-xl text-[0.72rem] leading-relaxed text-gray-600">
+						<p>© EladBG for RQuickShare Pi changes.</p>
+						<p class="mt-2">
+							Based on
+							<button
+								type="button"
+								class="text-blue-600 hover:underline"
+								@click="openUpstream">
+								RQuickShare
+							</button>
+							by Martin ANDRE and contributors.
+						</p>
+						<p class="mt-2">
+							Original copyrights remain with their authors. Provided without warranty under the
+							<button
+								type="button"
+								class="text-blue-600 hover:underline"
+								@click="openLicense">
+								GPL-3.0 license
+							</button>.
+						</p>
+					</div>
+				</details>
 				<button
 					type="button"
 					class="btn h-9 min-w-12 !px-2 rounded-xl active:scale-95 transition duration-150 ease-in-out text-[0.7rem] font-semibold"
