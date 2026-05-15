@@ -71,6 +71,10 @@ async function copyText(text) {
 }
 
 document.querySelectorAll('pre').forEach((block) => {
+	if (block.hasAttribute('data-no-copy')) {
+		return;
+	}
+
 	const code = block.querySelector('code');
 	const button = document.createElement('button');
 	button.type = 'button';
