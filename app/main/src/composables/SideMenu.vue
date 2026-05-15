@@ -26,6 +26,10 @@ function openUpstream() {
 function openLicense() {
 	void open('https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE');
 }
+
+function openLegalNotice() {
+	void open('https://github.com/EladBG-code/rquickshare-pi/blob/master/LEGAL_NOTICE.md');
+}
 </script>
 
 <template>
@@ -76,7 +80,7 @@ function openLicense() {
 							<path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
 						</svg>
 					</summary>
-					<div class="absolute bottom-11 left-0 z-20 w-60 rounded-xl border border-rose-100 bg-white p-3 shadow-xl text-[0.72rem] leading-relaxed text-gray-600">
+					<div class="absolute bottom-11 left-0 z-20 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-rose-100 bg-white p-3 shadow-xl text-[0.72rem] leading-relaxed text-gray-600">
 						<p>© EladBG for RQuickShare Pi changes.</p>
 						<p class="mt-2">
 							Based on
@@ -97,6 +101,20 @@ function openLicense() {
 								GPL-3.0 license
 							</button>.
 						</p>
+						<p class="mt-2">
+							Independent community fork. Not affiliated with, endorsed by, sponsored by, or officially supported
+							by Google, Android, Samsung, Ko-fi, or the original RQuickShare maintainers.
+						</p>
+						<p class="mt-2">
+							Brand names are used only for compatibility, platform behavior, and donation-link identification.
+							All trademarks belong to their respective owners.
+						</p>
+						<button
+							type="button"
+							class="mt-2 text-blue-600 hover:underline"
+							@click="openLegalNotice">
+							Full legal notice
+						</button>
 					</div>
 				</details>
 				<button

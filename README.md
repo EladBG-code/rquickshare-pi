@@ -78,6 +78,18 @@ Guardrails for this repo:
 
 ## 🛠️ Build On Raspberry Pi OS
 
+Install the latest public ARM64 release:
+
+```bash
+curl -fsSL https://eladbg-code.github.io/rquickshare-pi/install.sh | bash
+```
+
+This downloads the newest Raspberry Pi ARM64 `.deb` from GitHub Releases and
+installs it with apt. A real APT repository is not published yet, so
+`sudo apt install rquickshare-pi` is not available directly.
+
+## 🧱 Build From Source
+
 Fast path:
 
 ```bash
@@ -315,6 +327,8 @@ GPL-3.0
 
 RQuickShare Pi includes modifications by EladBG-code. Original RQuickShare
 copyrights, author notices, license terms, and project history remain intact.
+
+Additional legal and trademark notices are in [LEGAL_NOTICE.md](LEGAL_NOTICE.md).
 
 ## 🙏 Credits
 

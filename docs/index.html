@@ -81,19 +81,20 @@
 			<div class="install-grid">
 				<article>
 					<span class="step">1</span>
-					<h3>Download the alpha</h3>
-					<p>Grab the ARM64 Debian package from GitHub Releases.</p>
-					<a href="https://github.com/EladBG-code/rquickshare-pi/releases">Open releases</a>
+					<h3>Install latest release</h3>
+					<p>Run the Pi installer. It downloads the newest ARM64 Debian package from GitHub Releases.</p>
+					<pre><code>curl -fsSL https://eladbg-code.github.io/rquickshare-pi/install.sh | bash</code></pre>
 				</article>
 				<article>
 					<span class="step">2</span>
-					<h3>Install on the Pi</h3>
-					<pre><code>sudo apt install ./RQuickShare.Pi_0.0.1-alpha_arm64.deb</code></pre>
+					<h3>Launch from Accessories</h3>
+					<p>The app runs from the system tray and can start hidden at boot.</p>
 				</article>
 				<article>
 					<span class="step">3</span>
-					<h3>Launch from Accessories</h3>
-					<p>The app runs from the system tray and can start hidden at boot.</p>
+					<h3>Prefer manual install?</h3>
+					<p>You can still download the `.deb` yourself and install it with apt.</p>
+					<a href="https://github.com/EladBG-code/rquickshare-pi/releases">Open releases</a>
 				</article>
 			</div>
 		</section>
@@ -159,9 +160,9 @@
 					</article>
 					<article class="wiki-page" data-topic="install" data-keywords="install deb package apt accessories menu">
 						<h3>Install</h3>
-						<p>Download the `.deb` from the Releases page and install it locally:</p>
-						<pre><code>sudo apt install ./RQuickShare.Pi_0.0.1-alpha_arm64.deb</code></pre>
-						<p>After install, the launcher should appear under Accessories on Raspberry Pi OS.</p>
+						<p>Use the hosted installer on Raspberry Pi OS 64-bit. It finds the latest ARM64 `.deb` release and installs it with apt:</p>
+						<pre><code>curl -fsSL https://eladbg-code.github.io/rquickshare-pi/install.sh | bash</code></pre>
+						<p>After install, the launcher should appear under Accessories on Raspberry Pi OS. Manual packages remain available on GitHub Releases.</p>
 					</article>
 					<article class="wiki-page" data-topic="boot-tray" data-keywords="boot startup autostart tray hidden minimized show window">
 						<h3>Boot & Tray Behavior</h3>
@@ -230,6 +231,7 @@ ip addr</code></pre>
 								<p>RQuickShare Pi is based on RQuickShare by Martin ANDRE and contributors.</p>
 								<p>This fork preserves the upstream GPL-3.0 license, copyright notices, credits, and project history. Original RQuickShare copyrights remain with their respective authors.</p>
 								<p>RQuickShare Pi changes are maintained by EladBG. This software is provided without warranty under the GPL-3.0 license.</p>
+								<p>RQuickShare Pi is an independent community fork. It is not affiliated with, endorsed by, sponsored by, or officially supported by Google, Android, Samsung, Ko-fi, or the original RQuickShare maintainers.</p>
 							</div>
 						</details>
 					</article>
@@ -243,14 +245,25 @@ ip addr</code></pre>
 			<img src="assets/rquickshare-pi.svg" alt="" class="footer-mark">
 			<span>RQuickShare Pi</span>
 		</div>
-		<details class="footer-credits">
-			<summary>Credits & license</summary>
-			<p>
-				Based on <a href="https://github.com/Martichou/rquickshare">RQuickShare</a> by Martin ANDRE and contributors.
-				This fork preserves the upstream GPL-3.0 license, copyright notices, credits, and project history.
-				RQuickShare Pi changes are maintained by EladBG and are provided without warranty under GPL-3.0.
-			</p>
-		</details>
+		<div class="footer-notices">
+			<details class="footer-credits">
+				<summary>Credits & license</summary>
+				<p>
+					Based on <a href="https://github.com/Martichou/rquickshare">RQuickShare</a> by Martin ANDRE and contributors.
+					This fork preserves the upstream GPL-3.0 license, copyright notices, credits, and project history.
+					RQuickShare Pi changes are maintained by EladBG and are provided without warranty under GPL-3.0.
+				</p>
+			</details>
+			<details class="footer-credits">
+				<summary>Legal & trademarks</summary>
+				<p>
+					RQuickShare Pi is an independent community fork and is not affiliated with, endorsed by, sponsored by, or officially supported by Google, Android, Samsung, Ko-fi, or the original RQuickShare maintainers.
+					Names such as Quick Share, Android, Samsung, and Ko-fi are used only for compatibility, platform behavior, and donation-link identification.
+					All trademarks belong to their respective owners.
+					<a href="https://github.com/EladBG-code/rquickshare-pi/blob/master/LEGAL_NOTICE.md">Read the full legal notice.</a>
+				</p>
+			</details>
+		</div>
 	</footer>
 
 	<script src="app.js"></script>
