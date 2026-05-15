@@ -4,9 +4,36 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="RQuickShare Pi is a Raspberry Pi OS ARM64 focused Quick Share app, built and tested on real Pi hardware.">
+	<meta name="keywords" content="RQuickShare Pi, Raspberry Pi Quick Share, Android Quick Share Linux, Raspberry Pi OS ARM64, Nearby Share, Bluetooth mDNS file sharing">
+	<meta name="robots" content="index, follow">
+	<meta name="theme-color" content="#d12e5d">
 	<title>RQuickShare Pi</title>
+	<link rel="canonical" href="https://eladbg-code.github.io/rquickshare-pi/">
 	<link rel="icon" href="assets/rquickshare-pi.svg" type="image/svg+xml">
 	<link rel="stylesheet" href="styles.css">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="RQuickShare Pi">
+	<meta property="og:description" content="A Raspberry Pi OS ARM64 focused Quick Share app, built and tested on real Pi hardware.">
+	<meta property="og:url" content="https://eladbg-code.github.io/rquickshare-pi/">
+	<meta property="og:image" content="https://eladbg-code.github.io/rquickshare-pi/assets/rquickshare-pi.svg">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="RQuickShare Pi">
+	<meta name="twitter:description" content="Quick Share for Raspberry Pi OS ARM64, built and tested on real Pi hardware.">
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "SoftwareApplication",
+			"name": "RQuickShare Pi",
+			"applicationCategory": "UtilitiesApplication",
+			"operatingSystem": "Raspberry Pi OS 64-bit",
+			"softwareVersion": "0.0.1-alpha",
+			"license": "https://www.gnu.org/licenses/gpl-3.0.html",
+			"url": "https://eladbg-code.github.io/rquickshare-pi/",
+			"codeRepository": "https://github.com/EladBG-code/rquickshare-pi",
+			"downloadUrl": "https://github.com/EladBG-code/rquickshare-pi/releases",
+			"description": "A Raspberry Pi OS ARM64 focused Quick Share app, built and tested on real Pi hardware."
+		}
+	</script>
 </head>
 <body>
 	<header class="site-header">
@@ -18,6 +45,7 @@
 			<a href="#download">Download</a>
 			<a href="#pi-stack">Pi Stack</a>
 			<a href="#wiki">Wiki</a>
+			<a href="#support">Support</a>
 			<a href="https://github.com/EladBG-code/rquickshare-pi">GitHub</a>
 		</nav>
 	</header>
@@ -44,10 +72,12 @@
 			</div>
 			<div class="hero-device" aria-label="RQuickShare Pi status preview">
 				<div class="device-topbar">
-					<span class="dot red"></span>
-					<span class="dot green"></span>
-					<span class="dot dark"></span>
 					<span class="window-title">RQuickShare Pi</span>
+					<div class="window-controls" aria-hidden="true">
+						<span>⌄</span>
+						<span>⌃</span>
+						<span>×</span>
+					</div>
 				</div>
 				<div class="device-body">
 					<div class="device-sidebar">
@@ -145,7 +175,6 @@
 					<button class="wiki-tab" data-topic="samsung">Samsung Caveat</button>
 					<button class="wiki-tab" data-topic="build">Build From Source</button>
 					<button class="wiki-tab" data-topic="troubleshooting">Troubleshooting</button>
-					<button class="wiki-tab" data-topic="support">Support</button>
 					<button class="wiki-tab" data-topic="credits">Credits & License</button>
 				</aside>
 				<div class="wiki-pages">
@@ -203,26 +232,6 @@ systemctl status avahi-daemon --no-pager
 ip addr</code></pre>
 						<p>If the app creates an error report, attach it to a GitHub issue with what you were trying to send.</p>
 					</article>
-					<article class="wiki-page" data-topic="support" data-keywords="support donate kofi ko-fi maintenance open source free gpl optional">
-						<h3>Support The Pi Work</h3>
-						<div class="support-card">
-							<div class="support-mark">
-								<img src="assets/kofi-logo.svg" alt="">
-							</div>
-							<div>
-								<p>
-									RQuickShare Pi is free and open-source software under the GPL-3.0 license. No payment is required to use, copy, modify, or redistribute it under those license terms.
-								</p>
-								<p>
-									Donations are optional and help support Pi-focused testing, packaging, and maintenance. They do not unlock private features, support priority, warranty, or a different license.
-								</p>
-								<a class="support-button" href="https://ko-fi.com/eladbg" target="_blank" rel="noopener noreferrer">
-									<img src="assets/kofi-logo.svg" alt="">
-									Donate on Ko-fi
-								</a>
-							</div>
-						</div>
-					</article>
 					<article class="wiki-page" data-topic="credits" data-keywords="credits license upstream rquickshare gpl copyright warranty">
 						<h3>Credits & License</h3>
 						<details class="credit-disclosure">
@@ -235,6 +244,34 @@ ip addr</code></pre>
 							</div>
 						</details>
 					</article>
+				</div>
+			</div>
+		</section>
+
+		<section id="support" class="support-shell section-pad">
+			<div class="support-panel">
+				<div class="support-copy">
+					<p class="eyebrow">Open source support</p>
+					<h2>Support Me ❤️</h2>
+					<p>
+						RQuickShare Pi stays free and open-source under GPL-3.0. If this Pi-focused work helps you, optional donations help cover testing, packaging, and maintenance time.
+					</p>
+					<p>
+						Donations never unlock private features, support priority, warranty, or a different license. The project remains usable, copyable, modifiable, and redistributable under its GPL terms.
+					</p>
+				</div>
+				<div class="support-card">
+					<div class="support-mark">
+						<img src="assets/kofi-logo.svg" alt="">
+					</div>
+					<div>
+						<h3>Keep the Pi builds moving</h3>
+						<p>Support is entirely optional, but it helps keep real ARM64 testing and Raspberry Pi OS polish moving forward.</p>
+						<a class="support-button" href="https://ko-fi.com/eladbg" target="_blank" rel="noopener noreferrer">
+							<img src="assets/kofi-logo.svg" alt="">
+							Donate on Ko-fi
+						</a>
+					</div>
 				</div>
 			</div>
 		</section>

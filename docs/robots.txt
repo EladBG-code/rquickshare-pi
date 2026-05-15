@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://eladbg-code.github.io/rquickshare-pi/sitemap.xml
