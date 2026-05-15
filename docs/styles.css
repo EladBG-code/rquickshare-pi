@@ -599,6 +599,39 @@ h3 {
 	padding-left: 1.2rem;
 }
 
+.wiki-note {
+	margin-top: 1rem;
+	padding: 1rem 1.1rem;
+	border: 1px solid rgba(209, 46, 93, 0.18);
+	border-radius: 18px;
+	background: rgba(255, 240, 243, 0.72);
+}
+
+.wiki-note.soft {
+	background: rgba(233, 245, 228, 0.56);
+	border-color: rgba(101, 154, 69, 0.2);
+}
+
+.wiki-note strong {
+	display: block;
+	margin-bottom: 0.3rem;
+	color: var(--ink);
+	font-size: 0.95rem;
+}
+
+.wiki-note p {
+	margin: 0;
+}
+
+.wiki-note code {
+	padding: 0.08rem 0.32rem;
+	border-radius: 7px;
+	background: rgba(36, 23, 29, 0.08);
+	color: var(--raspberry-dark);
+	font-size: 0.92em;
+	font-weight: 750;
+}
+
 .wiki-empty {
 	display: none;
 	color: var(--muted);
