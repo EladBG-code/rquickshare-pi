@@ -51,6 +51,17 @@ pub struct AppState {
 }
 
 #[cfg(target_os = "linux")]
+fn apply_pi_webkit_workarounds() {
+    // Raspberry Pi OS can show a corrupted first WebKitGTK frame until the
+    // window is manually resized. Disable WebKit compositing before Tauri
+    // creates the webview so every launch path, including tray/autostart,
+    // gets the same stable renderer behavior.
+    if std::env::var_os("WEBKIT_DISABLE_COMPOSITING_MODE").is_none() {
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    }
+}
+
+#[cfg(target_os = "linux")]
 fn setup_tray(app: &tauri::App) -> Result<(), anyhow::Error> {
     let icon_dir = linux_tray_icon_dir()?;
     let icon_dir = icon_dir.to_string_lossy().into_owned();
@@ -147,6 +158,9 @@ fn setup_tray(app: &tauri::App) -> Result<(), anyhow::Error> {
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+    #[cfg(target_os = "linux")]
+    apply_pi_webkit_workarounds();
+
     std::panic::set_hook(Box::new(|panic_info| {
         let _ = cmds::write_native_error_report("panic", &panic_info.to_string());
     }));
