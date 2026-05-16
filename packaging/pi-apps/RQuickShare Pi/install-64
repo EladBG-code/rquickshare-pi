@@ -20,4 +20,4 @@ if command -v systemctl >/dev/null 2>&1; then
   sudo systemctl enable --now avahi-daemon || warning "Could not enable the Avahi/mDNS service automatically. Open the RQuickShare Pi wiki if Android discovery fails."
 fi
 
-status_green "RQuickShare Pi is installed. Open it from the Internet menu or the system tray."
+status_green "RQuickShare Pi is installed. Open it from the Accessories menu or the system tray."
