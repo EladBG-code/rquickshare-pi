@@ -350,3 +350,13 @@ support story.
 <a href="https://ko-fi.com/eladbg">
   <img width="600" height="300" alt="eladbg-Sharable-Profile)-Horizontal copy" src="https://github.com/user-attachments/assets/6d59980e-deeb-461f-a1a0-df62a0a030cb" href="https://ko-fi.com/eladbg"/>
 </a>
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=EladBG-code%2Frquickshare-pi&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=EladBG-code/rquickshare-pi&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=EladBG-code/rquickshare-pi&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=EladBG-code/rquickshare-pi&type=date&legend=top-left" />
+ </picture>
+</a>
