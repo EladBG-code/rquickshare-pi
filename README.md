@@ -345,6 +345,16 @@ This fork starts as Raspberry Pi compatibility work, but it is intended to grow
 into a Pi-first app with its own identity, release flow, and hardware-tested
 support story.
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=EladBG-code%2Frquickshare-pi&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=EladBG-code/rquickshare-pi&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=EladBG-code/rquickshare-pi&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=EladBG-code/rquickshare-pi&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ## ❤️ If you feel like supporting me for more stuff like this
 
 <a href="https://ko-fi.com/eladbg">
