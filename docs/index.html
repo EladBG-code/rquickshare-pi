@@ -163,7 +163,7 @@
 				</div>
 				<label class="wiki-search">
 					<span>Search wiki</span>
-					<input id="wikiSearch" type="search" placeholder="Try Bluetooth, Samsung, autostart...">
+					<input id="wikiSearch" type="search" placeholder="Try Bluetooth, Samsung, WebKit...">
 				</label>
 			</div>
 			<div class="wiki-layout">
@@ -223,7 +223,7 @@ pnpm install --frozen-lockfile
 pnpm check
 pnpm build:debug</code></pre>
 					</article>
-					<article class="wiki-page" data-topic="troubleshooting" data-keywords="troubleshooting logs bluetooth avahi systemctl rfkill report issue">
+					<article class="wiki-page" data-topic="troubleshooting" data-keywords="troubleshooting logs bluetooth avahi systemctl rfkill report issue webkit render window stripes compositor">
 						<h3>Troubleshooting</h3>
 						<p>Useful checks when discovery or receiving fails:</p>
 						<pre><code>bluetoothctl show
@@ -231,6 +231,10 @@ rfkill list bluetooth
 systemctl status bluetooth --no-pager
 systemctl status avahi-daemon --no-pager
 ip addr</code></pre>
+						<div class="wiki-note">
+							<strong>Pi WebKit rendering</strong>
+							<p>The installed Debian release applies the Raspberry Pi WebKitGTK compositor workaround automatically before the Tauri webview starts. If you are running from source, keep <code>WEBKIT_DISABLE_COMPOSITING_MODE=1</code> in your dev command.</p>
+						</div>
 						<p>If the app creates an error report, attach it to a GitHub issue with what you were trying to send.</p>
 					</article>
 					<article class="wiki-page" data-topic="uninstall" data-keywords="uninstall remove clean apt package autostart data config">
