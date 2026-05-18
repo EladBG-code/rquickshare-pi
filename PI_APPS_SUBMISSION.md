@@ -44,7 +44,7 @@ RQuickShare Pi currently targets Raspberry Pi OS 64-bit on ARM64 only. Pi-Apps s
 When publishing a new RQuickShare Pi release, update this line in `packaging/pi-apps/RQuickShare Pi/install-64`:
 
 ```bash
-version="0.0.1-alpha"
+version="0.0.2-alpha"
 ```
 
 Then verify the `.deb` asset name still matches:

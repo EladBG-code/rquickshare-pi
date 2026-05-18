@@ -1,6 +1,6 @@
 [package]
 name = "rquickshare-pi"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 default-run = "rquickshare-pi"
 edition = "2021"
 authors = ["martichou", "EladBG-code"]

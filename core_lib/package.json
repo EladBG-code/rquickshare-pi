@@ -1,6 +1,6 @@
 {
 	"name": "@martichou/core_lib",
-	"version": "0.0.1-alpha",
+	"version": "0.0.2-alpha",
 	"description": "Models being shared with the VueJS application",
 	"main": "dist/index.js",
 	"module": "esm/index.js",

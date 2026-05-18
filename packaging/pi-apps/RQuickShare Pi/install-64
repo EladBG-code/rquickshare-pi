@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="0.0.1-alpha"
+version="0.0.2-alpha"
 deb_url="https://github.com/EladBG-code/rquickshare-pi/releases/download/v${version}/RQuickShare.Pi_${version}_arm64.deb"
 
 case "$(dpkg --print-architecture 2>/dev/null)" in

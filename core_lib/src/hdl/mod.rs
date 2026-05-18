@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use p256::{PublicKey, SecretKey};
 use serde::{Deserialize, Serialize};
@@ -83,6 +83,9 @@ pub struct InnerState {
     // pub text_is_url: bool,
     // pub wifi_ssid: Option<String>,
     pub payload_buffers: HashMap<i64, Vec<u8>>,
+    pub received_payload_acks: HashSet<i64>,
+    pub received_safe_disconnect_ack: bool,
+    pub received_disconnection: bool,
 }
 
 #[derive(Debug, Clone)]

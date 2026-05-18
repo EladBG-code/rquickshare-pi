@@ -19,6 +19,7 @@ use sha2::{Digest, Sha256, Sha512};
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 use tokio::sync::broadcast::{Receiver, Sender};
+use tokio::time::{timeout_at, Instant};
 use ts_rs::TS;
 
 use super::info::{InternalFileInfo, TransferMetadata};
@@ -27,7 +28,7 @@ use crate::channel::{ChannelAction, ChannelDirection, ChannelMessage};
 use crate::location_nearby_connections::bandwidth_upgrade_negotiation_frame::upgrade_path_info::Medium;
 use crate::location_nearby_connections::connection_response_frame::ResponseStatus;
 use crate::location_nearby_connections::payload_transfer_frame::{
-    payload_header, PacketType, PayloadChunk, PayloadHeader,
+    control_message, payload_header, PacketType, PayloadChunk, PayloadHeader,
 };
 use crate::location_nearby_connections::{KeepAliveFrame, OfflineFrame, PayloadTransferFrame};
 use crate::securegcm::ukey2_alert::AlertType;
@@ -53,6 +54,10 @@ type HmacSha256 = Hmac<Sha256>;
 
 const SANE_FRAME_LENGTH: i32 = 5 * 1024 * 1024;
 const SANITY_DURATION: Duration = Duration::from_micros(10);
+const PAYLOAD_ACK_PACKET_TYPE: i32 = 3;
+const PAYLOAD_ACK_TIMEOUT: Duration = Duration::from_secs(3);
+const OUTGOING_DISCONNECTION_DELAY: Duration = Duration::from_secs(60);
+const SAFE_DISCONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[derive(Debug, Deserialize, Serialize, TS)]
 #[ts(export)]
@@ -72,6 +77,34 @@ pub struct OutboundRequest {
 }
 
 impl OutboundRequest {
+    fn target_device_type(&self) -> DeviceType {
+        self.state
+            .transfer_metadata
+            .as_ref()
+            .and_then(|metadata| metadata.source.as_ref())
+            .map(|source| source.device_type.clone())
+            .unwrap_or(DeviceType::Unknown)
+    }
+
+    fn use_windows_compatibility(&self) -> bool {
+        matches!(self.target_device_type(), DeviceType::Laptop)
+    }
+
+    fn wait_for_receiver_completion(&self) -> bool {
+        matches!(
+            self.target_device_type(),
+            DeviceType::Laptop | DeviceType::Phone
+        )
+    }
+
+    fn receiver_completion_timeout(&self) -> Duration {
+        if self.target_device_type() == DeviceType::Phone {
+            OUTGOING_DISCONNECTION_DELAY
+        } else {
+            PAYLOAD_ACK_TIMEOUT
+        }
+    }
+
     pub fn new(
         endpoint_id: [u8; 4],
         socket: TcpStream,
@@ -362,6 +395,7 @@ impl OutboundRequest {
 					os_info: Some(location_nearby_connections::OsInfo {
 						r#type: Some(location_nearby_connections::os_info::OsType::Linux.into())
 					}),
+                    safe_to_disconnect_version: self.use_windows_compatibility().then_some(6),
 					..Default::default()
 				}),
                 ..Default::default()
@@ -468,63 +502,105 @@ impl OutboundRequest {
                     .payload_header
                     .as_ref()
                     .ok_or_else(|| anyhow!("Missing required fields"))?;
-                let chunk = payload_transfer
-                    .payload_chunk
-                    .as_ref()
-                    .ok_or_else(|| anyhow!("Missing required fields"))?;
 
-                match header.r#type() {
-                    payload_header::PayloadType::Bytes => {
-                        info!("Processing PayloadType::Bytes");
-                        let payload_id = header.id();
+                match payload_transfer.packet_type.unwrap_or_default() {
+                    packet_type if packet_type == PacketType::Data as i32 => {
+                        let chunk = payload_transfer
+                            .payload_chunk
+                            .as_ref()
+                            .ok_or_else(|| anyhow!("Missing required fields"))?;
 
-                        if header.total_size() > SANE_FRAME_LENGTH.into() {
-                            self.state.payload_buffers.remove(&payload_id);
-                            return Err(anyhow!(
-                                "Payload too large: {} bytes",
-                                header.total_size()
-                            ));
-                        }
+                        match header.r#type() {
+                            payload_header::PayloadType::Bytes => {
+                                info!("Processing PayloadType::Bytes");
+                                let payload_id = header.id();
 
-                        self.state
-                            .payload_buffers
-                            .entry(payload_id)
-                            .or_insert_with(|| Vec::with_capacity(header.total_size() as usize));
+                                if header.total_size() > SANE_FRAME_LENGTH.into() {
+                                    self.state.payload_buffers.remove(&payload_id);
+                                    return Err(anyhow!(
+                                        "Payload too large: {} bytes",
+                                        header.total_size()
+                                    ));
+                                }
 
-                        // Get the current length of the buffer, if it exists, without holding a mutable borrow.
-                        let buffer_len = self.state.payload_buffers.get(&payload_id).unwrap().len();
-                        if chunk.offset() != buffer_len as i64 {
-                            self.state.payload_buffers.remove(&payload_id);
-                            return Err(anyhow!(
-                                "Unexpected chunk offset: {}, expected: {}",
-                                chunk.offset(),
-                                buffer_len
-                            ));
-                        }
+                                self.state
+                                    .payload_buffers
+                                    .entry(payload_id)
+                                    .or_insert_with(|| {
+                                        Vec::with_capacity(header.total_size() as usize)
+                                    });
 
-                        let buffer = self.state.payload_buffers.get_mut(&payload_id).unwrap();
-                        if let Some(body) = &chunk.body {
-                            buffer.extend(body);
-                        }
+                                // Get the current length of the buffer, if it exists, without holding a mutable borrow.
+                                let buffer_len =
+                                    self.state.payload_buffers.get(&payload_id).unwrap().len();
+                                if chunk.offset() != buffer_len as i64 {
+                                    self.state.payload_buffers.remove(&payload_id);
+                                    return Err(anyhow!(
+                                        "Unexpected chunk offset: {}, expected: {}",
+                                        chunk.offset(),
+                                        buffer_len
+                                    ));
+                                }
 
-                        if (chunk.flags() & 1) == 1 {
-                            debug!("Chunk flags & 1 == 1 ?? End of data ??");
+                                let buffer =
+                                    self.state.payload_buffers.get_mut(&payload_id).unwrap();
+                                if let Some(body) = &chunk.body {
+                                    buffer.extend(body);
+                                }
 
-                            let innner_frame = sharing_nearby::Frame::decode(buffer.as_slice())?;
-                            self.process_transfer_setup(&innner_frame).await?;
+                                if (chunk.flags() & 1) == 1 {
+                                    debug!("Chunk flags & 1 == 1 ?? End of data ??");
+
+                                    let innner_frame =
+                                        sharing_nearby::Frame::decode(buffer.as_slice())?;
+                                    self.process_transfer_setup(&innner_frame).await?;
+                                }
+                            }
+                            payload_header::PayloadType::File => {
+                                error!("Unhandled PayloadType::File: {:?}", header.r#type())
+                            }
+                            payload_header::PayloadType::Stream => {
+                                error!("Unhandled PayloadType::Stream: {:?}", header.r#type())
+                            }
+                            payload_header::PayloadType::UnknownPayloadType => {
+                                error!(
+                                    "Invalid PayloadType::UnknownPayloadType: {:?}",
+                                    header.r#type()
+                                )
+                            }
                         }
                     }
-                    payload_header::PayloadType::File => {
-                        error!("Unhandled PayloadType::File: {:?}", header.r#type())
+                    packet_type if packet_type == PacketType::Control as i32 => {
+                        let control = payload_transfer
+                            .control_message
+                            .as_ref()
+                            .ok_or_else(|| anyhow!("Missing required fields"))?;
+
+                        match control.event.unwrap_or_default() {
+                            event
+                                if event
+                                    == control_message::EventType::PayloadReceivedAck as i32 =>
+                            {
+                                self.record_payload_ack(header.id());
+                            }
+                            event => {
+                                debug!(
+                                    "Ignoring outbound payload control event {} for payload {}",
+                                    event,
+                                    header.id()
+                                );
+                            }
+                        }
                     }
-                    payload_header::PayloadType::Stream => {
-                        error!("Unhandled PayloadType::Stream: {:?}", header.r#type())
+                    PAYLOAD_ACK_PACKET_TYPE => {
+                        self.record_payload_ack(header.id());
                     }
-                    payload_header::PayloadType::UnknownPayloadType => {
-                        error!(
-                            "Invalid PayloadType::UnknownPayloadType: {:?}",
-                            header.r#type()
-                        )
+                    packet_type => {
+                        debug!(
+                            "Ignoring unsupported payload transfer packet type {} for payload {}",
+                            packet_type,
+                            header.id()
+                        );
                     }
                 }
             }
@@ -532,12 +608,254 @@ impl OutboundRequest {
                 trace!("Sending keepalive");
                 self.send_keepalive(true).await?;
             }
+            location_nearby_connections::v1_frame::FrameType::Disconnection => {
+                self.process_disconnection_frame(v1_frame).await?;
+            }
             _ => {
                 error!("Unhandled offline frame encrypted: {:?}", offline);
             }
         }
 
         Ok(())
+    }
+
+    fn record_payload_ack(&mut self, payload_id: i64) {
+        debug!("Received payload ack for payload {}", payload_id);
+        self.state.received_payload_acks.insert(payload_id);
+    }
+
+    async fn wait_for_payload_ack(
+        &mut self,
+        payload_id: i64,
+        wait_duration: Duration,
+    ) -> Result<bool, anyhow::Error> {
+        let deadline = Instant::now() + wait_duration;
+
+        loop {
+            if self.state.received_payload_acks.remove(&payload_id) {
+                info!("Receiver confirmed payload {}", payload_id);
+                return Ok(true);
+            }
+
+            let mut length_buf = [0u8; 4];
+            match timeout_at(
+                deadline,
+                stream_read_exact(&mut self.socket, &mut length_buf),
+            )
+            .await
+            {
+                Ok(Ok(())) => {
+                    let msg_length = u32::from_be_bytes(length_buf) as usize;
+                    if msg_length > SANE_FRAME_LENGTH as usize {
+                        return Err(anyhow!("Message length too big while waiting for ack"));
+                    }
+
+                    let mut frame_data = vec![0u8; msg_length];
+                    stream_read_exact(&mut self.socket, &mut frame_data).await?;
+                    let smsg = SecureMessage::decode(&*frame_data)?;
+                    self.decrypt_and_process_ack_wait_message(&smsg).await?;
+                }
+                Ok(Err(e)) => return Err(e),
+                Err(_) => {
+                    warn!(
+                        "Timed out waiting {:?} for payload ack for {}",
+                        wait_duration, payload_id
+                    );
+                    return Ok(false);
+                }
+            }
+        }
+    }
+
+    async fn decrypt_and_process_ack_wait_message(
+        &mut self,
+        smsg: &SecureMessage,
+    ) -> Result<(), anyhow::Error> {
+        let mut hmac = HmacSha256::new_from_slice(self.state.recv_hmac_key.as_ref().unwrap())?;
+        hmac.update(&smsg.header_and_body);
+        if !hmac
+            .finalize()
+            .into_bytes()
+            .as_slice()
+            .eq(smsg.signature.as_slice())
+        {
+            return Err(anyhow!("hmac!=signature"));
+        }
+
+        let header_and_body = HeaderAndBody::decode(&*smsg.header_and_body)?;
+
+        let msg_data = header_and_body.body;
+        let key = self.state.decrypt_key.as_ref().unwrap();
+
+        let mut cipher = Cipher::new_256(key[..AES_256_KEY_LEN].try_into()?);
+        cipher.set_auto_padding(true);
+        let decrypted = cipher.cbc_decrypt(header_and_body.header.iv(), &msg_data);
+
+        let d2d_msg = DeviceToDeviceMessage::decode(&*decrypted)?;
+
+        let seq = self.get_client_seq_inc().await;
+        if d2d_msg.sequence_number() != seq {
+            return Err(anyhow!(
+                "Error d2d_msg.sequence_number invalid ({} vs {})",
+                d2d_msg.sequence_number(),
+                seq
+            ));
+        }
+
+        let offline = location_nearby_connections::OfflineFrame::decode(d2d_msg.message())?;
+        let v1_frame = offline
+            .v1
+            .as_ref()
+            .ok_or_else(|| anyhow!("Missing required fields"))?;
+
+        match v1_frame.r#type() {
+            location_nearby_connections::v1_frame::FrameType::PayloadTransfer => {
+                let payload_transfer = v1_frame
+                    .payload_transfer
+                    .as_ref()
+                    .ok_or_else(|| anyhow!("Missing required fields"))?;
+                let header = payload_transfer
+                    .payload_header
+                    .as_ref()
+                    .ok_or_else(|| anyhow!("Missing required fields"))?;
+
+                match payload_transfer.packet_type.unwrap_or_default() {
+                    packet_type if packet_type == PacketType::Control as i32 => {
+                        let control = payload_transfer
+                            .control_message
+                            .as_ref()
+                            .ok_or_else(|| anyhow!("Missing required fields"))?;
+
+                        if control.event.unwrap_or_default()
+                            == control_message::EventType::PayloadReceivedAck as i32
+                        {
+                            self.record_payload_ack(header.id());
+                        }
+                    }
+                    PAYLOAD_ACK_PACKET_TYPE => {
+                        self.record_payload_ack(header.id());
+                    }
+                    packet_type => {
+                        debug!(
+                            "Ignoring packet type {} while waiting for payload ack {}",
+                            packet_type,
+                            header.id()
+                        );
+                    }
+                }
+            }
+            location_nearby_connections::v1_frame::FrameType::KeepAlive => {
+                trace!("Sending keepalive while waiting for payload ack");
+                self.send_keepalive(true).await?;
+            }
+            location_nearby_connections::v1_frame::FrameType::Disconnection => {
+                self.process_disconnection_frame(v1_frame).await?;
+            }
+            _ => {
+                debug!(
+                    "Ignoring {:?} while waiting for payload ack",
+                    v1_frame.r#type()
+                );
+            }
+        }
+
+        Ok(())
+    }
+
+    fn record_safe_disconnect_ack(&mut self) {
+        debug!("Received safe-to-disconnect ack");
+        self.state.received_safe_disconnect_ack = true;
+    }
+
+    async fn process_disconnection_frame(
+        &mut self,
+        v1_frame: &location_nearby_connections::V1Frame,
+    ) -> Result<(), anyhow::Error> {
+        let disconnection = v1_frame
+            .disconnection
+            .as_ref()
+            .ok_or_else(|| anyhow!("Missing required fields"))?;
+        let request_safe = disconnection.request_safe_to_disconnect.unwrap_or(false);
+        let ack_safe = disconnection.ack_safe_to_disconnect.unwrap_or(false);
+
+        debug!(
+            "Received disconnection frame: request_safe_to_disconnect={}, ack_safe_to_disconnect={}",
+            request_safe, ack_safe
+        );
+        self.state.received_disconnection = true;
+
+        if self.state.state == State::SendingFiles
+            && self
+                .state
+                .transferred_files
+                .values()
+                .all(|file| file.bytes_transferred >= file.total_size)
+        {
+            let payload_ids: Vec<i64> = self.state.transferred_files.keys().copied().collect();
+            for payload_id in payload_ids {
+                info!(
+                    "Treating receiver disconnection after final bytes as payload ack for {}",
+                    payload_id
+                );
+                self.record_payload_ack(payload_id);
+            }
+        }
+
+        if ack_safe {
+            self.record_safe_disconnect_ack();
+            return Ok(());
+        }
+
+        if request_safe {
+            self.record_safe_disconnect_ack();
+            self.disconnection_frame(true, true).await?;
+        }
+
+        Ok(())
+    }
+
+    async fn wait_for_safe_disconnect_ack(&mut self) -> Result<bool, anyhow::Error> {
+        let deadline = Instant::now() + SAFE_DISCONNECT_TIMEOUT;
+
+        loop {
+            if self.state.received_safe_disconnect_ack {
+                info!("Receiver confirmed safe-to-disconnect");
+                return Ok(true);
+            }
+
+            let mut length_buf = [0u8; 4];
+            match timeout_at(
+                deadline,
+                stream_read_exact(&mut self.socket, &mut length_buf),
+            )
+            .await
+            {
+                Ok(Ok(())) => {
+                    let msg_length = u32::from_be_bytes(length_buf) as usize;
+                    if msg_length > SANE_FRAME_LENGTH as usize {
+                        return Err(anyhow!(
+                            "Message length too big while waiting for safe disconnect"
+                        ));
+                    }
+
+                    let mut frame_data = vec![0u8; msg_length];
+                    stream_read_exact(&mut self.socket, &mut frame_data).await?;
+                    let smsg = SecureMessage::decode(&*frame_data)?;
+                    self.decrypt_and_process_ack_wait_message(&smsg).await?;
+                }
+                Ok(Err(e)) => {
+                    debug!(
+                        "Receiver closed while waiting for safe disconnect ack: {}",
+                        e
+                    );
+                    return Ok(false);
+                }
+                Err(_) => {
+                    warn!("Timed out waiting for safe-to-disconnect ack");
+                    return Ok(false);
+                }
+            }
+        }
     }
 
     async fn process_transfer_setup(
@@ -633,6 +951,9 @@ impl OutboundRequest {
             return Err(anyhow!("Missing required fields"));
         }
 
+        let target_device_type = self.target_device_type();
+        let use_windows_file_metadata = self.use_windows_compatibility();
+
         let mut file_metadata: Vec<FileMetadata> = vec![];
         let mut transferred_files: HashMap<i64, InternalFileInfo> = HashMap::new();
         let mut total_to_send = 0;
@@ -661,11 +982,25 @@ impl OutboundRequest {
                         }
                     };
 
-                    let ftype = mime_guess::from_path(path)
+                    let guessed_type = mime_guess::from_path(path)
                         .first_or_octet_stream()
                         .to_string();
+                    let is_svg = path
+                        .extension()
+                        .and_then(|extension| extension.to_str())
+                        .is_some_and(|extension| {
+                            extension.eq_ignore_ascii_case("svg")
+                                || extension.eq_ignore_ascii_case("svgz")
+                        });
+                    let ftype = if is_svg {
+                        String::from("application/octet-stream")
+                    } else {
+                        guessed_type
+                    };
 
-                    let meta_type = if ftype.starts_with("image/") {
+                    let meta_type = if target_device_type == DeviceType::Phone && is_svg {
+                        file_metadata::Type::Document
+                    } else if ftype.starts_with("image/") {
                         file_metadata::Type::Image
                     } else if ftype.starts_with("video/") {
                         file_metadata::Type::Video
@@ -673,22 +1008,33 @@ impl OutboundRequest {
                         file_metadata::Type::Audio
                     } else if path.extension().unwrap_or_default() == "apk" {
                         file_metadata::Type::App
+                    } else if target_device_type == DeviceType::Phone {
+                        file_metadata::Type::Document
                     } else {
                         file_metadata::Type::Unknown
                     };
 
-                    info!("File type to send: {}", ftype);
+                    info!("File type to send: {} ({:?})", ftype, meta_type);
                     let fname = path
                         .file_name()
                         .ok_or_else(|| anyhow!("Failed to get file_name for {f}"))?;
+                    let payload_id = rand::rng().random::<i64>();
+                    let attachment_id = use_windows_file_metadata.then_some(payload_id);
                     let fmeta = FileMetadata {
-                        payload_id: Some(rand::rng().random::<i64>()),
+                        payload_id: Some(payload_id),
+                        id: attachment_id,
                         name: Some(fname.to_os_string().into_string().unwrap()),
                         size: Some(fmetadata.size() as i64),
                         mime_type: Some(ftype),
                         r#type: Some(meta_type.into()),
                         ..Default::default()
                     };
+                    info!(
+                        "File metadata ids for {:?}: payload_id={}, attachment_id={:?}",
+                        target_device_type,
+                        fmeta.payload_id(),
+                        fmeta.id
+                    );
                     transferred_files.insert(
                         fmeta.payload_id(),
                         InternalFileInfo {
@@ -764,6 +1110,7 @@ impl OutboundRequest {
                         Some(i) => i,
                         None => {
                             info!("All files have been transferred");
+                            let use_windows_completion = self.use_windows_compatibility();
                             self.update_state(
                                 |e| {
                                     e.state = State::Finished;
@@ -771,8 +1118,17 @@ impl OutboundRequest {
                                 true,
                             )
                             .await;
-                            self.disconnection().await?;
-                            // Breaking instead of NotAnError to allow peacefull termination
+
+                            if self.state.received_disconnection {
+                                debug!(
+                                    "Receiver already disconnected after completing transfer; skipping local disconnect"
+                                );
+                            } else if use_windows_completion {
+                                let _ = self.safe_disconnection().await?;
+                            } else {
+                                self.disconnection().await?;
+                            }
+
                             break;
                         }
                     };
@@ -905,6 +1261,14 @@ impl OutboundRequest {
 							};
 
                             self.encrypt_and_send(&wrapper).await?;
+                            if self.wait_for_receiver_completion() {
+                                let _ = self
+                                    .wait_for_payload_ack(
+                                        current,
+                                        self.receiver_completion_timeout(),
+                                    )
+                                    .await?;
+                            }
                             break;
                         }
                     }
@@ -942,10 +1306,33 @@ impl OutboundRequest {
             }
         }
 
+        if self.state.state == State::Finished {
+            return Err(anyhow!(crate::errors::AppError::NotAnError));
+        }
+
         Ok(())
     }
 
+    async fn safe_disconnection(&mut self) -> Result<bool, anyhow::Error> {
+        if self.state.received_disconnection {
+            info!("Receiver already disconnected; skipping safe-to-disconnect request");
+            return Ok(false);
+        }
+
+        self.state.received_safe_disconnect_ack = false;
+        self.disconnection_frame(true, false).await?;
+        self.wait_for_safe_disconnect_ack().await
+    }
+
     async fn disconnection(&mut self) -> Result<(), anyhow::Error> {
+        self.disconnection_frame(false, false).await
+    }
+
+    async fn disconnection_frame(
+        &mut self,
+        request_safe_to_disconnect: bool,
+        ack_safe_to_disconnect: bool,
+    ) -> Result<(), anyhow::Error> {
         let frame = location_nearby_connections::OfflineFrame {
             version: Some(location_nearby_connections::offline_frame::Version::V1.into()),
             v1: Some(location_nearby_connections::V1Frame {
@@ -953,6 +1340,8 @@ impl OutboundRequest {
                     location_nearby_connections::v1_frame::FrameType::Disconnection.into(),
                 ),
                 disconnection: Some(location_nearby_connections::DisconnectionFrame {
+                    request_safe_to_disconnect: Some(request_safe_to_disconnect),
+                    ack_safe_to_disconnect: Some(ack_safe_to_disconnect),
                     ..Default::default()
                 }),
                 ..Default::default()

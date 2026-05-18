@@ -289,7 +289,15 @@ References:
 - [Samsung Quick Share Wi-Fi note](https://www.samsung.com/levant/support/mobile-devices/quick-share-cannot-be-used-when-wi-fi-is-off-and-wi-fi-turns-on-when-setting-who-can-share-with-you-option/)
 - [Packet Linux Quick Share requirements](https://github.com/nozwock/packet#requirements)
 
-Blank WebKit window:
+### Raspberry Pi/WebKit window corruption
+
+The installed Debian release applies the Raspberry Pi WebKitGTK compositor
+workaround automatically before the Tauri webview starts. This fixes the Pi
+window corruption issue where the first visible frame could appear as
+horizontal stripes until manually resized.
+
+If you are running from source or debugging manually, keep the environment
+variable in your command:
 
 ```bash
 WEBKIT_DISABLE_COMPOSITING_MODE=1 pnpm dev
