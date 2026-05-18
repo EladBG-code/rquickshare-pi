@@ -147,6 +147,7 @@ async function sendInfo(vm: TauriVM, eid: string) {
 		id: ei.id,
 		name: ei.name ?? 'Unknown',
 		addr: ei.ip + ":" + ei.port,
+		device_type: ei.rtype ?? 'Unknown',
 		ob: vm.outboundPayload,
 	};
 

@@ -1,6 +1,6 @@
 [package]
 name = "rqs_lib"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 edition = "2021"
 authors = ["martichou", "EladBG-code"]
 repository = "https://github.com/EladBG-code/rquickshare-pi"

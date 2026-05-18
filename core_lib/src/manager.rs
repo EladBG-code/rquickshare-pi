@@ -8,7 +8,7 @@ use ts_rs::TS;
 use crate::channel::{ChannelDirection, ChannelMessage};
 use crate::errors::AppError;
 use crate::hdl::{InboundRequest, OutboundPayload, OutboundRequest, State};
-use crate::utils::RemoteDeviceInfo;
+use crate::utils::{DeviceType, RemoteDeviceInfo};
 
 const INNER_NAME: &str = "TcpServer";
 
@@ -18,6 +18,7 @@ pub struct SendInfo {
     pub id: String,
     pub name: String,
     pub addr: String,
+    pub device_type: DeviceType,
     pub ob: OutboundPayload,
 }
 
@@ -124,7 +125,7 @@ impl TcpServer {
             si.ob,
             self.device_name_receiver.borrow().clone(),
             RemoteDeviceInfo {
-                device_type: crate::DeviceType::Unknown,
+                device_type: si.device_type,
                 name: si.name,
             },
         );
