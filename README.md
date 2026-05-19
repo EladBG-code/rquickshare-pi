@@ -8,7 +8,39 @@
   </p>
 
   <p>
-    🥧 Raspberry Pi 5 · 🐧 Raspberry Pi OS 64-bit · 🦀 Rust · ⚡ Tauri · 📡 mDNS · 🟦 Bluetooth
+    <a href="https://github.com/EladBG-code/rquickshare-pi/releases">
+      <img alt="Status: alpha" src="https://img.shields.io/badge/status-alpha-d12e5d?style=flat-square&labelColor=3b363d">
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/releases/latest">
+      <img alt="Latest release" src="https://img.shields.io/github/v/release/EladBG-code/rquickshare-pi?include_prereleases&label=latest&style=flat-square&labelColor=3b363d&color=2f6df6">
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml">
+      <img alt="Code quality" src="https://img.shields.io/github/actions/workflow/status/EladBG-code/rquickshare-pi/lint.yml?branch=master&label=code%20quality&style=flat-square&labelColor=3b363d">
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml">
+      <img alt="Pi target policy" src="https://img.shields.io/github/actions/workflow/status/EladBG-code/rquickshare-pi/build.yml?branch=master&label=pi%20target&style=flat-square&labelColor=3b363d">
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE">
+      <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/EladBG-code/rquickshare-pi?style=flat-square&labelColor=3b363d&color=1f9d55">
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/stargazers">
+      <img alt="GitHub stars" src="https://img.shields.io/github/stars/EladBG-code/rquickshare-pi?style=flat-square&labelColor=3b363d&color=f6c343">
+    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/releases">
+      <img alt="Release downloads" src="https://img.shields.io/github/downloads/EladBG-code/rquickshare-pi/total?style=flat-square&labelColor=3b363d&color=1f9d55">
+    </a>
+  </p>
+
+  <p>
+    <img alt="Raspberry Pi 5" src="https://img.shields.io/badge/Raspberry%20Pi-5-c51a4a?style=flat-square&labelColor=3b363d">
+    <img alt="Raspberry Pi OS 64-bit" src="https://img.shields.io/badge/Raspberry%20Pi%20OS-64--bit-c51a4a?style=flat-square&labelColor=3b363d">
+    <img alt="Architecture: ARM64" src="https://img.shields.io/badge/arch-ARM64-2f6df6?style=flat-square&labelColor=3b363d">
+    <img alt="Debian Bookworm" src="https://img.shields.io/badge/Debian-Bookworm-a81d33?style=flat-square&labelColor=3b363d">
+    <img alt="Rust" src="https://img.shields.io/badge/Rust-core-b7410e?style=flat-square&labelColor=3b363d">
+    <img alt="Tauri 2" src="https://img.shields.io/badge/Tauri-2-24c8db?style=flat-square&labelColor=3b363d">
+    <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square&labelColor=3b363d">
+    <img alt="Bluetooth" src="https://img.shields.io/badge/Bluetooth-discovery-1672f3?style=flat-square&labelColor=3b363d">
+    <img alt="mDNS" src="https://img.shields.io/badge/mDNS-networking-1f9d55?style=flat-square&labelColor=3b363d">
   </p>
 
   <p>
