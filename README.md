@@ -8,57 +8,25 @@
   </p>
 
   <p>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/releases">
-      <img alt="Status: alpha" src="https://img.shields.io/static/v1?label=status&message=alpha&color=d12e5d&style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/releases/latest">
-      <img alt="Latest release" src="https://img.shields.io/static/v1?label=latest&message=v0.0.2-alpha&color=2f6df6&style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml">
-      <img alt="Code quality" src="https://img.shields.io/static/v1?label=code%20quality&message=passing&color=4cbd38&style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml">
-      <img alt="Pi target policy" src="https://img.shields.io/static/v1?label=pi%20target&message=passing&color=4cbd38&style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE">
-      <img alt="License: GPL-3.0" src="https://img.shields.io/static/v1?label=license&message=GPL-3.0&color=1f9d55&style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/stargazers">
-      <img alt="GitHub stars" src="https://img.shields.io/static/v1?label=stars&message=star%20the%20repo&color=f6c343&style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://github.com/EladBG-code/rquickshare-pi/releases">
-      <img alt="Release downloads" src="https://img.shields.io/static/v1?label=downloads&message=releases&color=1f9d55&style=flat-square&labelColor=3b363d">
-    </a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/releases"><img alt="Status: alpha" src="https://img.shields.io/static/v1?label=status&message=alpha&color=d12e5d&style=flat-square&labelColor=3b363d"></a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/releases/latest"><img alt="Latest release" src="https://img.shields.io/static/v1?label=latest&message=v0.0.2-alpha&color=2f6df6&style=flat-square&labelColor=3b363d"></a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml"><img alt="Code quality" src="https://img.shields.io/static/v1?label=code%20quality&message=passing&color=4cbd38&style=flat-square&labelColor=3b363d"></a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml"><img alt="Pi target policy" src="https://img.shields.io/static/v1?label=pi%20target&message=passing&color=4cbd38&style=flat-square&labelColor=3b363d"></a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/static/v1?label=license&message=GPL-3.0&color=1f9d55&style=flat-square&labelColor=3b363d"></a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/stargazers"><img alt="GitHub stars" src="https://img.shields.io/static/v1?label=stars&message=star%20the%20repo&color=f6c343&style=flat-square&labelColor=3b363d"></a>
+    <a href="https://github.com/EladBG-code/rquickshare-pi/releases"><img alt="Release downloads" src="https://img.shields.io/static/v1?label=downloads&message=releases&color=1f9d55&style=flat-square&labelColor=3b363d"></a>
   </p>
 
   <p>
-    <a href="https://www.raspberrypi.com/products/raspberry-pi-5/">
-      <img alt="Raspberry Pi 5" src="https://img.shields.io/badge/Raspberry%20Pi-5-c51a4a?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://www.raspberrypi.com/software/operating-systems/">
-      <img alt="Raspberry Pi OS 64-bit" src="https://img.shields.io/badge/Raspberry%20Pi%20OS-64--bit-c51a4a?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://en.wikipedia.org/wiki/AArch64">
-      <img alt="Architecture: ARM64" src="https://img.shields.io/badge/arch-ARM64-2f6df6?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://www.debian.org/releases/bookworm/">
-      <img alt="Debian Bookworm" src="https://img.shields.io/badge/Debian-Bookworm-a81d33?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://rust-lang.org/">
-      <img alt="Rust" src="https://img.shields.io/badge/Rust-core-b7410e?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://v2.tauri.app/">
-      <img alt="Tauri 2" src="https://img.shields.io/badge/Tauri-2-24c8db?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://vuejs.org/">
-      <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://en.wikipedia.org/wiki/Bluetooth">
-      <img alt="Bluetooth" src="https://img.shields.io/badge/Bluetooth-discovery-1672f3?style=flat-square&labelColor=3b363d">
-    </a>
-    <a href="https://en.wikipedia.org/wiki/Multicast_DNS">
-      <img alt="mDNS" src="https://img.shields.io/badge/mDNS-networking-1f9d55?style=flat-square&labelColor=3b363d">
-    </a>
+    <a href="https://www.raspberrypi.com/products/raspberry-pi-5/"><img alt="Raspberry Pi 5" src="https://img.shields.io/badge/Raspberry%20Pi-5-c51a4a?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://www.raspberrypi.com/software/operating-systems/"><img alt="Raspberry Pi OS 64-bit" src="https://img.shields.io/badge/Raspberry%20Pi%20OS-64--bit-c51a4a?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://en.wikipedia.org/wiki/AArch64"><img alt="Architecture: ARM64" src="https://img.shields.io/badge/arch-ARM64-2f6df6?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://www.debian.org/releases/bookworm/"><img alt="Debian Bookworm" src="https://img.shields.io/badge/Debian-Bookworm-a81d33?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://rust-lang.org/"><img alt="Rust" src="https://img.shields.io/badge/Rust-core-b7410e?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://v2.tauri.app/"><img alt="Tauri 2" src="https://img.shields.io/badge/Tauri-2-24c8db?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://vuejs.org/"><img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://en.wikipedia.org/wiki/Bluetooth"><img alt="Bluetooth" src="https://img.shields.io/badge/Bluetooth-discovery-1672f3?style=flat-square&labelColor=3b363d"></a>
+    <a href="https://en.wikipedia.org/wiki/Multicast_DNS"><img alt="mDNS" src="https://img.shields.io/badge/mDNS-networking-1f9d55?style=flat-square&labelColor=3b363d"></a>
   </p>
 
   <p>
