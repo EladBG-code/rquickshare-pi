@@ -1,0 +1,74 @@
+name: Update README badges
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published, edited, deleted, prereleased, released]
+  watch:
+    types: [started]
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update_badges:
+    if: github.repository == 'EladBG-code/rquickshare-pi'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read repository stats
+        id: stats
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" --jq 'map(select(.draft | not)) | sort_by(.published_at // .created_at) | reverse | .[0].tag_name // "none"')"
+          stars="$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.stargazers_count')"
+          downloads="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" --jq '[.[].assets[].download_count] | add // 0')"
+
+          echo "latest=${latest}" >> "$GITHUB_OUTPUT"
+          echo "stars=${stars}" >> "$GITHUB_OUTPUT"
+          echo "downloads=${downloads}" >> "$GITHUB_OUTPUT"
+
+      - name: Render badges
+        run: |
+          python3 .github/scripts/render_badges.py \
+            --output /tmp/rquickshare-pi-badges \
+            --latest "${{ steps.stats.outputs.latest }}" \
+            --stars "${{ steps.stats.outputs.stars }}" \
+            --downloads "${{ steps.stats.outputs.downloads }}"
+
+      - name: Publish badges branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin badges || true
+          if git show-ref --verify --quiet refs/remotes/origin/badges; then
+            git checkout -B badges origin/badges
+          else
+            git checkout --orphan badges
+          fi
+
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp /tmp/rquickshare-pi-badges/*.svg .
+          cat > README.md <<'BADGES'
+# RQuickShare Pi README badges
+
+This branch is generated automatically by the `Update README badges` workflow.
+BADGES
+
+          git add .
+          if git diff --cached --quiet; then
+            echo "Badges are already up to date."
+            exit 0
+          fi
+
+          git commit -m "Update README badges"
+          git push origin badges
