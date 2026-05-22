@@ -9,25 +9,25 @@
 
   <p>
     <a href="https://github.com/EladBG-code/rquickshare-pi/releases">
-      <img alt="Status: alpha" src="https://img.shields.io/badge/status-alpha-d12e5d?style=flat-square&labelColor=3b363d">
+      <img alt="Status: alpha" src="https://img.shields.io/static/v1?label=status&message=alpha&color=d12e5d&style=flat-square&labelColor=3b363d">
     </a>
     <a href="https://github.com/EladBG-code/rquickshare-pi/releases/latest">
-      <img alt="Latest release" src="https://img.shields.io/github/v/release/EladBG-code/rquickshare-pi?include_prereleases&label=latest&style=flat-square&labelColor=3b363d&color=2f6df6">
+      <img alt="Latest release" src="https://img.shields.io/static/v1?label=latest&message=v0.0.2-alpha&color=2f6df6&style=flat-square&labelColor=3b363d">
     </a>
     <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/lint.yml">
-      <img alt="Code quality" src="https://img.shields.io/github/actions/workflow/status/EladBG-code/rquickshare-pi/lint.yml?branch=master&label=code%20quality&style=flat-square&labelColor=3b363d">
+      <img alt="Code quality" src="https://img.shields.io/static/v1?label=code%20quality&message=passing&color=4cbd38&style=flat-square&labelColor=3b363d">
     </a>
     <a href="https://github.com/EladBG-code/rquickshare-pi/actions/workflows/build.yml">
-      <img alt="Pi target policy" src="https://img.shields.io/github/actions/workflow/status/EladBG-code/rquickshare-pi/build.yml?branch=master&label=pi%20target&style=flat-square&labelColor=3b363d">
+      <img alt="Pi target policy" src="https://img.shields.io/static/v1?label=pi%20target&message=passing&color=4cbd38&style=flat-square&labelColor=3b363d">
     </a>
     <a href="https://github.com/EladBG-code/rquickshare-pi/blob/master/LICENSE">
-      <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/EladBG-code/rquickshare-pi?style=flat-square&labelColor=3b363d&color=1f9d55">
+      <img alt="License: GPL-3.0" src="https://img.shields.io/static/v1?label=license&message=GPL-3.0&color=1f9d55&style=flat-square&labelColor=3b363d">
     </a>
     <a href="https://github.com/EladBG-code/rquickshare-pi/stargazers">
-      <img alt="GitHub stars" src="https://img.shields.io/github/stars/EladBG-code/rquickshare-pi?style=flat-square&labelColor=3b363d&color=f6c343">
+      <img alt="GitHub stars" src="https://img.shields.io/static/v1?label=stars&message=star%20the%20repo&color=f6c343&style=flat-square&labelColor=3b363d">
     </a>
     <a href="https://github.com/EladBG-code/rquickshare-pi/releases">
-      <img alt="Release downloads" src="https://img.shields.io/github/downloads/EladBG-code/rquickshare-pi/total?style=flat-square&labelColor=3b363d&color=1f9d55">
+      <img alt="Release downloads" src="https://img.shields.io/static/v1?label=downloads&message=releases&color=1f9d55&style=flat-square&labelColor=3b363d">
     </a>
   </p>
 
