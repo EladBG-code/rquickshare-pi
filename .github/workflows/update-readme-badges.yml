@@ -58,11 +58,11 @@ jobs:
 
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp /tmp/rquickshare-pi-badges/*.svg .
-          cat > README.md <<'BADGES'
-# RQuickShare Pi README badges
-
-This branch is generated automatically by the `Update README badges` workflow.
-BADGES
+          printf '%s\n' \
+            '# RQuickShare Pi README badges' \
+            '' \
+            'This branch is generated automatically by the `Update README badges` workflow.' \
+            > README.md
 
           git add .
           if git diff --cached --quiet; then
