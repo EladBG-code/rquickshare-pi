@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="101" height="20" role="img" aria-label="downloads: 11">
+  <title>downloads: 11</title>
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#fff" stop-opacity=".08"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".08"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect width="101" height="20" rx="0" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect width="73" height="20" fill="#3b363d"/>
+    <rect x="73" width="28" height="20" fill="#1f9d55"/>
+    <rect width="101" height="20" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,DejaVu Sans,sans-serif" font-size="11">
+    <text x="36.5" y="15" fill="#010101" fill-opacity=".3">downloads</text>
+    <text x="36.5" y="14">downloads</text>
+    <text x="87.0" y="15" fill="#010101" fill-opacity=".3">11</text>
+    <text x="87.0" y="14">11</text>
+  </g>
+</svg>
