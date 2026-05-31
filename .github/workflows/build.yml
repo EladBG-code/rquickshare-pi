@@ -16,5 +16,5 @@ jobs:
     steps:
       - name: Raspberry Pi target policy
         run: |
-          echo "RQuickShare Pi support is built and tested on real Raspberry Pi OS ARM64 hardware."
-          echo "GitHub-hosted x86_64/macOS builds are intentionally not used as support proof for this fork."
+          echo "RQuickShare Pi compatibility is verified on real Raspberry Pi OS ARM64 hardware."
+          echo "GitHub-hosted x86_64/macOS builds are intentionally not used as Raspberry Pi compatibility proof for this fork."

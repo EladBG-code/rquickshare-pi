@@ -30,7 +30,7 @@
   </p>
 
   <p>
-    Hardware target: Raspberry Pi OS 64-bit on ARM64. Support is claimed only after local Pi build/run testing.
+    Hardware target: Raspberry Pi OS 64-bit on ARM64. Compatibility notes are based on local Pi build/run testing.
   </p>
 </div>
 
@@ -40,7 +40,7 @@ RQuickShare Pi is a Raspberry Pi-focused fork of
 [RQuickShare](https://github.com/Martichou/rquickshare), the open-source
 Nearby Share / Quick Share desktop app.
 
-This fork exists because Raspberry Pi support needs real ARM64 testing, native
+This fork exists because Raspberry Pi compatibility needs real ARM64 testing, native
 Linux desktop dependencies, Bluetooth, mDNS, WebKitGTK, and patience. A GitHub
 Actions build on x86_64 does not prove anything here. This repo is for the real
 Pi target.
@@ -72,10 +72,10 @@ Verified locally on the Pi:
 Known rough edges:
 
 - ⚠️ Full Tauri `targets = "all"` bundling can stall on non-Debian package
-  formats. Use the Debian bundle while Pi support is being stabilized.
+  formats. Use the Debian bundle while Pi compatibility is being stabilized.
 - ⚠️ Vue devtools Electron sidecar crashes on this Pi setup, so `pnpm dev`
   intentionally runs Tauri directly.
-- ⚠️ Raspberry Pi support is experimental until repeated send/receive testing
+- ⚠️ Raspberry Pi compatibility is experimental until repeated send/receive testing
   is complete.
 
 ## 🧬 Relationship To Upstream
@@ -253,7 +253,7 @@ app/main/src-tauri/icons/rquickshare-pi.svg
 
 ## 🧪 Test Notes
 
-Real support means testing on the Pi, not just compiling somewhere else.
+Real compatibility notes come from testing on the Pi, not just compiling somewhere else.
 
 Useful commands:
 
